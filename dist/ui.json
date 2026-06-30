@@ -1,0 +1,137 @@
+{
+  "head": {
+    "lang": "zh-CN",
+    "charset": "UTF-8",
+    "viewport": "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
+    "title": "ByUsi Studio - 开源创新力量",
+    "favicon": {
+      "href": "/favicon.png",
+      "type": "image/png"
+    },
+    "stylesheets": [
+      {
+        "href": "/Font/css/all.min.css",
+        "integrity": "",
+        "crossorigin": "",
+        "referrerpolicy": ""
+      }
+    ],
+    "preconnect": [],
+    "preload": []
+  },
+  "light": {
+    "bg-color": "#f8fbff",
+    "text-color": "#333",
+    "primary": "#3498db",
+    "primary-dark": "#2980b9",
+    "secondary": "#2c3e50",
+    "accent": "#e74c3c",
+    "light-gray": "#f5f7fa",
+    "dark-gray": "#666",
+    "card-bg": "#ffffff",
+    "border-color": "#eee",
+    "shadow": "0 2px 10px rgba(0, 0, 0, 0.08)",
+    "transition": "all 0.3s ease"
+  },
+  "dark": {
+    "bg-color": "#1a1a2e",
+    "text-color": "#e0e0e0",
+    "primary": "#4da6ff",
+    "primary-dark": "#3399ff",
+    "secondary": "#e8e8e8",
+    "accent": "#ff6b6b",
+    "light-gray": "#2d2d44",
+    "dark-gray": "#a0a0a0",
+    "card-bg": "#252540",
+    "border-color": "#3d3d5c",
+    "shadow": "0 2px 10px rgba(0, 0, 0, 0.3)",
+    "transition": "all 0.3s ease"
+  },
+  "layout": {
+    "navbar": {
+      "showLogo": true,
+      "logoText": "ByUsi Studio",
+      "logoImage": "/logo/byusi.png",
+      "height": 60,
+      "sticky": true,
+      "links": [
+        { "href": "#home", "icon": "fas fa-home", "label": "首页" },
+        { "href": "#projects", "icon": "fas fa-code", "label": "项目" },
+        { "href": "https://gitee.com/byusiteam", "icon": "fas fa-book", "label": "文档", "external": true},
+        { "href": "https://idc.yunm.ltd/aff/WPYVRRFB", "icon": "fas fa-cloud", "label": "青屿云", "external": true }
+      ]
+    },
+    "hero": {
+      "show": true,
+      "title": "ByUsi Studio 开源创新力量",
+      "subtitle": "共建共享 · 创新协作 · 开源未来",
+      "buttons": [
+        { "label": "查看项目", "icon": "fas fa-rocket", "action": "scrollToProjects", "primary": true },
+        { "label": "访问仓库", "icon": "fab fa-git-alt", "href": "https://gitee.com/byusi", "primary": false },
+        { "label": "青屿云", "icon": "fas fa-cloud", "href": "https://idc.yunm.ltd/aff/WPYVRRFB", "external": true, "primary": true }
+      ]
+    },
+    "stats": {
+      "show": true,
+      "cards": [
+        { "key": "totalRepos", "label": "开源项目" },
+        { "key": "totalStars", "label": "累计星标" },
+        { "key": "totalForks", "label": "项目分支" },
+        { "key": "activeRepos", "label": "活跃项目" }
+      ]
+    },
+    "projects": {
+      "show": true,
+      "title": "开源项目列表",
+      "searchPlaceholder": "搜索项目名称或描述...",
+      "filters": [
+        { "key": "all", "label": "全部项目" },
+        { "key": "recent", "label": "最近更新" },
+        { "key": "popular", "label": "热门项目" },
+        { "key": "forked", "label": "分支最多" },
+        { "key": "stars", "label": "星标最多" },
+        { "key": "archived", "label": "归档项目" }
+      ],
+      "itemsPerPage": 10
+    },
+    "team": {
+      "show": true,
+      "title": "团队理念",
+      "items": [
+        { "icon": "fas fa-hands-helping", "title": "协作共赢", "description": "我们相信开源的力量在于协作，通过共享知识和技术，共同推动行业发展。" },
+        { "icon": "fas fa-lightbulb", "title": "创新驱动", "description": "持续探索新技术，解决实际问题，创造有价值的开源解决方案。" },
+        { "icon": "fas fa-share-alt", "title": "开放共享", "description": "坚持开放源代码原则，促进技术透明度和社区参与度。" }
+      ]
+    },
+    "footer": {
+      "show": true,
+      "copyright": "© 2026 ByUsi Studio",
+      "subtitle": "开源创新力量",
+      "columns": [
+        {
+          "title": "关于我们",
+          "links": [
+            { "label": "团队介绍", "href": "#home" },
+            { "label": "开源项目", "href": "#projects" },
+            { "label": "Gitee仓库", "href": "https://gitee.com/byusi", "external": true }
+          ]
+        },
+        {
+          "title": "资源链接",
+          "links": [
+            { "label": "Cdifit 云盘", "href": "https://cdifit.com/", "external": true },
+            { "label": "To Be Riftinued", "href": "https://www.yavgame.com", "external": true }
+          ]
+        },
+        {
+          "title": "联系我们",
+          "links": [
+            { "label": "Gitee主页", "href": "https://gitee.com/byusi", "external": true },
+            { "label": "提交问题", "href": "https://gitee.com/byusi/issues", "external": true },
+            { "label": "贡献代码", "href": "https://gitee.com/byusi/pulls", "external": true }
+          ]
+        }
+      ]
+    }
+  }
+}
