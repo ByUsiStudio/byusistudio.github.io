@@ -2043,37 +2043,17 @@ a {
     box-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
     transition: all 0.2s ease;
   }
-
-  &.pressed {
-    .mouse-follower-ring {
-      &-1 {
-        transform: translate(-50%, -50%) scale(1.5);
-        border-color: rgba(var(--primary-rgb), 0.6);
-      }
-
-      &-2 {
-        transform: translate(-50%, -50%) scale(0.8);
-      }
-    }
-
-    .mouse-follower-dot {
-      transform: translate(-50%, -50%) scale(1.5);
-      box-shadow: 0 0 15px var(--primary), 0 0 30px var(--primary);
-    }
-  }
 }
 
-.mouse-ripple {
+.mouse-particle {
   position: fixed;
-  top: -50px;
-  left: -50px;
-  width: 100px;
-  height: 100px;
+  top: -10px;
+  left: -10px;
   border-radius: 50%;
-  border: 2px solid rgba(var(--primary-rgb), 0.4);
+  background: var(--primary);
+  box-shadow: 0 0 10px var(--primary), 0 0 20px rgba(var(--primary-rgb), 0.6);
   pointer-events: none;
   z-index: 9998;
-  animation: rippleExpand 0.6s ease-out forwards;
   will-change: transform, opacity;
 }
 
