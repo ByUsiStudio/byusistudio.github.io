@@ -98,7 +98,7 @@ export function Header() {
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-          transition: all 0.4s @{ease-out-cubic};
+          transition: all 0.4s var(--ease-out-cubic);
           will-change: background, box-shadow, height;
         }
 
@@ -116,7 +116,7 @@ export function Header() {
           height: ${navbar.height}px;
           max-width: 1200px;
           margin: 0 auto;
-          transition: height 0.4s @{ease-out-cubic};
+          transition: height 0.4s var(--ease-out-cubic);
         }
 
         .navbar.scrolled .navbar-container {
@@ -159,7 +159,7 @@ export function Header() {
           border-radius: 8px;
           display: flex;
           align-items: center;
-          transition: all 0.3s @{ease-out-back};
+          transition: all 0.3s var(--ease-out-back);
           position: relative;
           overflow: hidden;
         }
@@ -244,7 +244,7 @@ export function Header() {
             box-shadow: ${theme.shadow};
             transform: translateY(-150%);
             opacity: 0;
-            transition: transform 0.4s @{ease-out-back}, opacity 0.3s ease;
+            transition: transform 0.4s var(--ease-out-back), opacity 0.3s ease;
           }
 
           .nav-links.active {
