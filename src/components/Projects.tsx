@@ -241,7 +241,6 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
                   <div className="project-item-inner">
                     <div className="project-item-header">
                       <div className="project-icon">
-                        <div className="project-icon-bg"></div>
                         <i className={getRepoIcon(repo)}></i>
                       </div>
                       <div className="project-info">
