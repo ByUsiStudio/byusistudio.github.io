@@ -15,6 +15,9 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
   const { theme } = useTheme();
   const { config } = useUiConfig();
   const containerRef = useRef<HTMLDivElement>(null);
+  const [filter, setFilter] = useState<FilterType>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [animateKey, setAnimateKey] = useState(0);
 
   useEffect(() => {
@@ -24,9 +27,6 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
   if (!config) return null;
 
   const { projects: projectsConfig } = config.layout;
-  const [filter, setFilter] = useState<FilterType>('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = projectsConfig.itemsPerPage;
 
   const filteredRepos = useMemo(() => {
