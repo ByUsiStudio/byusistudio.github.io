@@ -40,7 +40,7 @@ export function Header() {
         '--nav-bg-scrolled': `${theme['card-bg']}ee`,
         '--nav-shadow': `0 4px 30px rgba(0, 0, 0, 0.08)`,
         '--nav-shadow-scrolled': `0 8px 40px rgba(0, 0, 0, 0.12)`,
-      }}
+      } as React.CSSProperties}
     >
       <div className="navbar-container">
         <a

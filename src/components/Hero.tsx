@@ -28,7 +28,8 @@ export function Hero() {
               top: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 5}s`,
               animationDuration: `${5 + Math.random() * 5}s`,
-              size: `${4 + Math.random() * 8}px`,
+              width: `${4 + Math.random() * 8}px`,
+              height: `${4 + Math.random() * 8}px`,
             }}
           />
         ))}
