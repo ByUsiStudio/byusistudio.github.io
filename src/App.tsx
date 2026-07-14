@@ -11,6 +11,7 @@ import { Team } from './components/Team';
 import { Footer } from './components/Footer';
 import { ScrollProgress } from './components/ScrollProgress';
 import { BackToTop } from './components/BackToTop';
+import { MouseFollower } from './components/MouseFollower';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { fetchRepos } from './services/api';
 import type { Repo } from './types/ui';
@@ -63,6 +64,7 @@ function AppContent() {
   return (
     <ThemeProvider>
       <HeadConfig />
+      <MouseFollower />
       <ScrollProgress />
       {layout.navbar.sticky && <Header />}
       {layout.hero.show && <Hero />}
