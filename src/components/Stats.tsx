@@ -83,7 +83,18 @@ export function Stats({ repos }: StatsProps) {
   }, []);
 
   return (
-    <section id="stats" className="section">
+    <section
+      id="stats"
+      className="section"
+      style={{
+        '--primary': theme.primary,
+        '--accent': theme.accent,
+        '--secondary': theme.secondary,
+        '--dark-gray': theme['dark-gray'],
+        '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
+        '--accent-rgb': theme.accent.replace(/[rgb()]/g, ''),
+      } as React.CSSProperties}
+    >
       <div className="layui-container">
         <div ref={containerRef} className="stats-container scroll-animate">
           {statsConfig.cards.map((card, index) => (
@@ -100,91 +111,6 @@ export function Stats({ repos }: StatsProps) {
           ))}
         </div>
       </div>
-
-      <style>{`
-        .stats-container {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 25px;
-          margin-bottom: 40px;
-        }
-
-        .stat-card {
-          background: rgba(255, 255, 255, 0.7);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border-radius: 16px;
-          padding: 30px;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.5);
-          text-align: center;
-          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-          opacity: 0;
-          transform: translateY(35px) scale(0.95);
-          will-change: transform, box-shadow;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .stat-card::after {
-          content: '';
-          position: absolute;
-          top: -50%;
-          left: -50%;
-          width: 200%;
-          height: 200%;
-          background: radial-gradient(circle, rgba(52, 152, 219, 0.1) 0%, transparent 70%);
-          opacity: 0;
-          transition: opacity 0.4s ease;
-        }
-
-        .stats-container.animated .stat-card {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-          animation: statSlideUp 0.7s var(--ease-out-back) forwards;
-        }
-
-        .stat-card:hover {
-          transform: translateY(-8px) scale(1.02);
-          box-shadow: 0 15px 45px rgba(0, 0, 0, 0.15);
-        }
-
-        .stat-card:hover::after {
-          opacity: 1;
-        }
-
-        .stat-number {
-          font-size: 42px;
-          font-weight: 800;
-          color: ${theme.primary};
-          margin-bottom: 12px;
-          transition: color 0.3s ease;
-          display: inline-block;
-        }
-
-        .stat-card:hover .stat-number {
-          color: ${theme.accent};
-          transform: scale(1.05);
-        }
-
-        .stat-label {
-          color: ${theme['dark-gray']};
-          font-size: 15px;
-          font-weight: 500;
-        }
-
-        @media (max-width: 992px) {
-          .stats-container {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-
-        @media (max-width: 576px) {
-          .stats-container {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
     </section>
   );
 }

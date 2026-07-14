@@ -24,6 +24,9 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   transition: var(--transition);
+
+  --primary-rgb: 52, 152, 219;
+  --accent-rgb: 231, 76, 60;
 }
 
 a {
@@ -728,7 +731,7 @@ a {
 
 .hero {
   padding: 160px 0 100px;
-  background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, var(--bg-color) 100%);
+  background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1) 0%, var(--bg-color) 100%);
   position: relative;
   overflow: hidden;
   min-height: 100vh;
@@ -774,7 +777,7 @@ a {
     transform: translate(-50%, -50%);
     width: 600px;
     height: 600px;
-    background: radial-gradient(circle, rgba(52, 152, 219, 0.08) 0%, transparent 60%);
+    background: radial-gradient(circle, rgba(var(--primary-rgb), 0.08) 0%, transparent 60%);
     border-radius: 50%;
     animation: glowPulse 4s ease-in-out infinite;
     z-index: 0;
@@ -873,11 +876,11 @@ a {
 .btn-primary {
   background: var(--primary);
   color: white;
-  box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.3);
 
   &:hover {
     transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 12px 35px rgba(52, 152, 219, 0.5);
+    box-shadow: 0 12px 35px rgba(var(--primary-rgb), 0.5);
   }
 }
 
@@ -890,7 +893,7 @@ a {
     background: var(--primary);
     color: white;
     transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 12px 35px rgba(52, 152, 219, 0.5);
+    box-shadow: 0 12px 35px rgba(var(--primary-rgb), 0.5);
   }
 }
 
@@ -924,7 +927,7 @@ a {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(52, 152, 219, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(var(--primary-rgb), 0.1) 0%, transparent 70%);
     opacity: 0;
     transition: opacity 0.4s ease;
   }
@@ -983,7 +986,7 @@ a {
     &:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+      box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
     }
 
     &::placeholder {
@@ -1036,7 +1039,7 @@ a {
     border-color: var(--primary);
     color: var(--primary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.15);
   }
 }
 
@@ -1062,10 +1065,10 @@ a {
   will-change: transform, background, box-shadow;
 
   &:hover {
-    background: rgba(52, 152, 219, 0.08);
+    background: rgba(var(--primary-rgb), 0.08);
     padding-left: 38px;
     transform: translateX(5px);
-    box-shadow: 0 4px 20px rgba(52, 152, 219, 0.1);
+    box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.1);
   }
 
   &:last-child {
@@ -1120,14 +1123,14 @@ a {
   .project-badge {
     display: inline-block;
     padding: 2px 8px;
-    background: rgba(52, 152, 219, 0.1);
+    background: rgba(var(--primary-rgb), 0.1);
     color: var(--primary);
     border-radius: 12px;
     font-size: 12px;
     font-weight: 500;
 
     &.archived {
-      background: rgba(231, 76, 60, 0.1);
+      background: rgba(var(--accent-rgb), 0.1);
       color: var(--accent);
     }
   }
@@ -1172,7 +1175,7 @@ a {
 
     .project-link {
       padding: 6px 12px;
-      background: rgba(52, 152, 219, 0.1);
+      background: rgba(var(--primary-rgb), 0.1);
       color: var(--primary);
       border-radius: 4px;
       font-size: 13px;
@@ -1189,11 +1192,11 @@ a {
 
       &:hover {
         transform: translateY(-3px);
-        box-shadow: 0 6px 16px rgba(52, 152, 219, 0.25);
+        box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.25);
       }
 
       &.issue {
-        background: rgba(231, 76, 60, 0.1);
+        background: rgba(var(--accent-rgb), 0.1);
         color: var(--accent);
       }
     }
@@ -1237,7 +1240,7 @@ a {
     border-color: var(--primary);
     color: var(--primary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.15);
   }
 }
 
@@ -1269,13 +1272,13 @@ a {
 }
 
 .skeleton-icon {
-  background: linear-gradient(90deg, var(--border-color) 25%, rgba(52, 152, 219, 0.1) 50%, var(--border-color) 75%);
+  background: linear-gradient(90deg, var(--border-color) 25%, rgba(var(--primary-rgb), 0.1) 50%, var(--border-color) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
 
 .skeleton-text {
-  background: linear-gradient(90deg, var(--border-color) 25%, rgba(52, 152, 219, 0.1) 50%, var(--border-color) 75%);
+  background: linear-gradient(90deg, var(--border-color) 25%, rgba(var(--primary-rgb), 0.1) 50%, var(--border-color) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
@@ -1299,7 +1302,7 @@ a {
 }
 
 .skeleton-btn {
-  background: linear-gradient(90deg, var(--border-color) 25%, rgba(52, 152, 219, 0.1) 50%, var(--border-color) 75%);
+  background: linear-gradient(90deg, var(--border-color) 25%, rgba(var(--primary-rgb), 0.1) 50%, var(--border-color) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
@@ -1460,7 +1463,7 @@ a {
   transform: translateY(30px) scale(0.8);
   transition: all 0.4s @ease-out-back;
   z-index: 1000;
-  box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.3);
   will-change: opacity, transform, box-shadow;
 
   &.visible {
@@ -1472,7 +1475,7 @@ a {
 
   &:hover {
     transform: translateY(-3px) scale(1.08);
-    box-shadow: 0 10px 30px rgba(52, 152, 219, 0.5);
+    box-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.5);
   }
 
   &:active {
@@ -1482,11 +1485,47 @@ a {
 
 .animation-replay {
   animation-fill-mode: forwards;
+  animation-play-state: running;
 
   &.replaying {
     animation-fill-mode: none;
     animation-iteration-count: 1;
+    animation-play-state: running;
+    animation-delay: 0s;
   }
+
+  &.replay-paused {
+    animation-play-state: paused;
+  }
+}
+
+.replay-trigger {
+  animation: none;
+}
+
+.replay-trigger.replaying {
+  animation: inherit;
+  animation-fill-mode: none;
+  animation-iteration-count: 1;
+  animation-delay: 0s;
+}
+
+.stat-card.replaying {
+  animation: statSlideUp 0.7s @ease-out-back;
+  animation-fill-mode: none;
+  animation-iteration-count: 1;
+}
+
+.project-item.replaying {
+  animation: slideInRight 0.6s @ease-out-quart;
+  animation-fill-mode: none;
+  animation-iteration-count: 1;
+}
+
+.team-card.replaying {
+  animation: scaleInUp 0.6s @ease-out-back;
+  animation-fill-mode: none;
+  animation-iteration-count: 1;
 }
 
 @media (max-width: 768px) {

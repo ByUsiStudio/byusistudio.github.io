@@ -58,48 +58,6 @@ export function Footer({ repos }: FooterProps) {
           </p>
         </div>
       </div>
-
-      <style>{`
-        .footer {
-          background: #1a1a2e;
-          color: white;
-          padding: 60px 0 30px;
-        }
-
-        .footer-links {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 30px;
-          margin-bottom: 40px;
-        }
-
-        .footer-column h4 {
-          margin-bottom: 20px;
-          font-size: 16px;
-          font-weight: 600;
-        }
-
-        .footer-column ul {
-          list-style: none;
-          padding: 0;
-        }
-
-        .footer-column li {
-          margin-bottom: 10px;
-        }
-
-        .footer-column a {
-          color: rgba(255, 255, 255, 0.8);
-        }
-
-        .footer-bottom {
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
-          padding-top: 30px;
-          text-align: center;
-          color: rgba(255, 255, 255, 0.6);
-          font-size: 14px;
-        }
-      `}</style>
     </footer>
   );
 }
