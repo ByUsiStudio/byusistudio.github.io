@@ -15,27 +15,11 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
   const { theme } = useTheme();
   const { config } = useUiConfig();
   const containerRef = useRef<HTMLDivElement>(null);
-  const hasAnimated = useRef(false);
+  const [animateKey, setAnimateKey] = useState(0);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !hasAnimated.current) {
-            hasAnimated.current = true;
-            entry.target.classList.add('animated');
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
+    setAnimateKey((prev) => prev + 1);
+  }, [filter, searchTerm]);
 
   if (!config) return null;
 
@@ -214,10 +198,10 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
           </div>
         ) : (
           <>
-            <div ref={containerRef} className="project-list scroll-animate">
+            <div ref={containerRef} className="project-list">
               {paginatedRepos.map((repo, index) => (
                 <div
-                  key={repo.id}
+                  key={`${repo.id}-${animateKey}`}
                   className="project-item"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
