@@ -32,8 +32,6 @@ export interface Theme {
   transition: string;
 }
 
-export type ThemeMode = 'light' | 'dark';
-
 export interface HeroButton {
   label: string;
   icon: string;
@@ -130,7 +128,6 @@ export interface LayoutConfig {
 export interface UiConfig {
   head: UiHeadConfig;
   light: Theme;
-  dark: Theme;
   layout: LayoutConfig;
 }
 

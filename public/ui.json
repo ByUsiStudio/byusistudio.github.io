@@ -39,20 +39,6 @@
     "shadow": "0 2px 10px rgba(0, 0, 0, 0.08)",
     "transition": "all 0.3s ease"
   },
-  "dark": {
-    "bg-color": "#1a1a2e",
-    "text-color": "#e0e0e0",
-    "primary": "#4da6ff",
-    "primary-dark": "#3399ff",
-    "secondary": "#e8e8e8",
-    "accent": "#ff6b6b",
-    "light-gray": "#2d2d44",
-    "dark-gray": "#a0a0a0",
-    "card-bg": "#252540",
-    "border-color": "#3d3d5c",
-    "shadow": "0 2px 10px rgba(0, 0, 0, 0.3)",
-    "transition": "all 0.3s ease"
-  },
   "layout": {
     "navbar": {
       "showLogo": true,

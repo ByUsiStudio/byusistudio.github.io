@@ -3,7 +3,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useUiConfig } from '../context/UiConfigContext';
 
 export function Header() {
-  const { theme, mode, toggleMode } = useTheme();
+  const { theme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { config } = useUiConfig();
 
@@ -71,13 +71,6 @@ export function Header() {
               {link.label}
             </a>
           ))}
-          <button
-            className="theme-toggle-btn"
-            onClick={toggleMode}
-            title={mode === 'light' ? '切换到暗色模式' : '切换到亮色模式'}
-          >
-            <i className={mode === 'light' ? 'fas fa-moon' : 'fas fa-sun'}></i>
-          </button>
         </div>
       </div>
 
@@ -134,16 +127,6 @@ export function Header() {
           font-size: 16px;
         }
 
-        .theme-toggle-btn {
-          background: none;
-          border: none;
-          padding: 8px 15px;
-          color: ${theme['text-color']};
-          font-size: 16px;
-          cursor: pointer;
-          border-radius: 4px;
-        }
-
         .mobile-menu-btn {
           display: none;
           background: none;
@@ -194,12 +177,6 @@ export function Header() {
           .nav-links a {
             width: 100%;
             margin: 5px 0;
-            padding: 12px 15px;
-          }
-
-          .theme-toggle-btn {
-            width: 100%;
-            text-align: left;
             padding: 12px 15px;
           }
         }
