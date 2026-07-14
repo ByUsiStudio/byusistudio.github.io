@@ -118,29 +118,6 @@ export function Hero() {
           opacity: 0.5;
         }
 
-        @keyframes particleFloat {
-          0% {
-            transform: translateY(100vh) translateX(0) scale(0);
-            opacity: 0;
-          }
-          10% {
-            opacity: 0.4;
-            transform: translateY(80vh) translateX(10px) scale(1);
-          }
-          50% {
-            opacity: 0.3;
-            transform: translateY(50vh) translateX(-15px) scale(0.8);
-          }
-          90% {
-            opacity: 0.2;
-            transform: translateY(10vh) translateX(5px) scale(0.6);
-          }
-          100% {
-            transform: translateY(-10vh) translateX(0) scale(0);
-            opacity: 0;
-          }
-        }
-
         .hero-glow {
           position: absolute;
           top: 50%;
@@ -152,17 +129,6 @@ export function Hero() {
           border-radius: 50%;
           animation: glowPulse 4s ease-in-out infinite;
           z-index: 0;
-        }
-
-        @keyframes glowPulse {
-          0%, 100% {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 0.5;
-          }
-          50% {
-            transform: translate(-50%, -50%) scale(1.2);
-            opacity: 0.8;
-          }
         }
 
         .hero-content {

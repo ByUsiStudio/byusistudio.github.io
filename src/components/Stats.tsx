@@ -173,17 +173,6 @@ export function Stats({ repos }: StatsProps) {
           font-weight: 500;
         }
 
-        @keyframes statSlideUp {
-          from {
-            opacity: 0;
-            transform: translateY(35px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-
         @media (max-width: 992px) {
           .stats-container {
             grid-template-columns: repeat(2, 1fr);

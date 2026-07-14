@@ -563,17 +563,6 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
           color: ${theme.secondary};
         }
 
-        @keyframes slideInRight {
-          from {
-            opacity: 0;
-            transform: translateX(-30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
         .skeleton {
           background: transparent !important;
         }
@@ -615,11 +604,6 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
           border-radius: 4px;
           width: 60px;
           height: 28px;
-        }
-
-        @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
         }
 
         .project-link {
