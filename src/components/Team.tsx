@@ -61,10 +61,11 @@ export function Team() {
         .team-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 20px;
+          gap: 25px;
           opacity: 0;
-          transform: translateY(30px);
-          transition: all 0.6s ease-out;
+          transform: translateY(40px);
+          transition: all 0.7s var(--ease-out-quart);
+          will-change: opacity, transform;
         }
 
         .team-grid.animated {
@@ -76,42 +77,64 @@ export function Team() {
           background: rgba(255, 255, 255, 0.7);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
-          border-radius: 12px;
-          padding: 25px;
+          border-radius: 16px;
+          padding: 30px;
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
           border: 1px solid rgba(255, 255, 255, 0.5);
           text-align: center;
-          transition: all 0.3s ease;
+          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
           opacity: 0;
-          transform: scale(0.8);
+          transform: scale(0.85) translateY(20px);
+          will-change: transform, box-shadow;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .team-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, ${theme.primary}, transparent);
+          transform: scaleX(0);
+          transition: transform 0.4s ease;
         }
 
         .team-grid.animated .team-card {
           opacity: 1;
-          transform: scale(1);
-          animation: scaleIn 0.6s ease-out forwards;
+          transform: scale(1) translateY(0);
+          animation: scaleInUp 0.6s var(--ease-out-back) forwards;
         }
 
         .team-card:hover {
-          transform: translateY(-8px) scale(1.02);
-          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+          transform: translateY(-10px) scale(1.03);
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+        }
+
+        .team-card:hover::before {
+          transform: scaleX(1);
         }
 
         .team-icon {
-          font-size: 40px;
+          font-size: 44px;
           color: ${theme.primary};
-          margin-bottom: 15px;
-          transition: transform 0.3s ease;
+          margin-bottom: 20px;
+          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+          display: inline-block;
         }
 
         .team-card:hover .team-icon {
-          transform: scale(1.1) rotate(5deg);
+          transform: scale(1.15) rotate(8deg);
+          color: ${theme.accent};
         }
 
         .team-title {
           color: ${theme.secondary};
           margin-bottom: 15px;
           transition: color 0.3s ease;
+          font-size: 18px;
         }
 
         .team-card:hover .team-title {
@@ -120,17 +143,18 @@ export function Team() {
 
         .team-description {
           color: ${theme['dark-gray']};
-          line-height: 1.6;
+          line-height: 1.7;
+          font-size: 14px;
         }
 
-        @keyframes scaleIn {
+        @keyframes scaleInUp {
           from {
             opacity: 0;
-            transform: scale(0.8);
+            transform: scale(0.85) translateY(20px);
           }
           to {
             opacity: 1;
-            transform: scale(1);
+            transform: scale(1) translateY(0);
           }
         }
 

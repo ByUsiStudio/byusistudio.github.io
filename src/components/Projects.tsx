@@ -116,33 +116,30 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
     return (
       <section id="projects" className="section">
         <div className="layui-container">
-          <h2 className="section-title">{projectsConfig.title}</h2>
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p>正在加载项目数据...</p>
+          <h2 className="section-title scroll-animate">{projectsConfig.title}</h2>
+          <div className="project-list scroll-animate">
+            {[...Array(6)].map((_, idx) => (
+              <div key={idx} className="project-item skeleton">
+                <div className="project-item-header">
+                  <div className="project-icon skeleton-icon"></div>
+                  <div className="project-info">
+                    <div className="project-name skeleton-text"></div>
+                    <div className="project-description skeleton-text"></div>
+                    <div className="project-meta">
+                      <div className="meta-item skeleton-text small"></div>
+                      <div className="meta-item skeleton-text small"></div>
+                      <div className="meta-item skeleton-text small"></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="project-links">
+                  <div className="project-link skeleton-btn"></div>
+                  <div className="project-link skeleton-btn"></div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-
-        <style>{`
-          .loading-container {
-            text-align: center;
-            padding: 60px 0;
-          }
-
-          .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(52, 152, 219, 0.3);
-            border-radius: 50%;
-            border-top-color: ${theme.primary};
-            animation: spin 1s ease-in-out infinite;
-            margin: 0 auto 20px;
-          }
-
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
       </section>
     );
   }
@@ -369,25 +366,28 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
         }
 
         .project-item {
-          padding: 20px 25px;
+          padding: 22px 28px;
           border-bottom: 1px solid ${theme['border-color']};
           display: flex;
           align-items: center;
           justify-content: space-between;
-          transition: all 0.3s ease;
+          transition: all 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
           opacity: 0;
-          transform: translateX(-20px);
+          transform: translateX(-30px);
+          will-change: transform, background, box-shadow;
         }
 
         .project-list.animated .project-item {
           opacity: 1;
           transform: translateX(0);
-          animation: slideInRight 0.5s ease-out forwards;
+          animation: slideInRight 0.6s var(--ease-out-quart) forwards;
         }
 
         .project-item:hover {
-          background: rgba(52, 152, 219, 0.05);
-          padding-left: 35px;
+          background: rgba(52, 152, 219, 0.08);
+          padding-left: 38px;
+          transform: translateX(5px);
+          box-shadow: 0 4px 20px rgba(52, 152, 219, 0.1);
         }
 
         .project-item:last-child {
@@ -566,7 +566,7 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
         @keyframes slideInRight {
           from {
             opacity: 0;
-            transform: translateX(-20px);
+            transform: translateX(-30px);
           }
           to {
             opacity: 1;
@@ -574,29 +574,86 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
           }
         }
 
+        .skeleton {
+          background: transparent !important;
+        }
+
+        .skeleton-icon {
+          background: linear-gradient(90deg, ${theme['border-color']} 25%, rgba(52, 152, 219, 0.1) 50%, ${theme['border-color']} 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+        }
+
+        .skeleton-text {
+          background: linear-gradient(90deg, ${theme['border-color']} 25%, rgba(52, 152, 219, 0.1) 50%, ${theme['border-color']} 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+          border-radius: 4px;
+        }
+
+        .skeleton-text.small {
+          width: 80px;
+          height: 12px;
+        }
+
+        .project-name.skeleton-text {
+          width: 180px;
+          height: 20px;
+          margin-bottom: 8px;
+        }
+
+        .project-description.skeleton-text {
+          width: 100%;
+          height: 14px;
+          margin-bottom: 12px;
+        }
+
+        .skeleton-btn {
+          background: linear-gradient(90deg, ${theme['border-color']} 25%, rgba(52, 152, 219, 0.1) 50%, ${theme['border-color']} 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+          border-radius: 4px;
+          width: 60px;
+          height: 28px;
+        }
+
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+
         .project-link {
-          transition: all 0.3s ease;
+          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+          will-change: transform, box-shadow;
         }
 
         .project-link:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+          transform: translateY(-3px);
+          box-shadow: 0 6px 16px rgba(52, 152, 219, 0.25);
         }
 
         .filter-btn {
-          transition: all 0.3s ease;
+          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+          will-change: transform, border-color;
         }
 
         .filter-btn:hover:not(.active) {
           border-color: ${theme.primary};
           color: ${theme.primary};
-          transform: translateY(-1px);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+        }
+
+        .page-btn {
+          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+          will-change: transform, border-color;
         }
 
         .page-btn:hover:not(:disabled) {
           border-color: ${theme.primary};
           color: ${theme.primary};
-          transform: translateY(-1px);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
         }
       `}</style>
     </section>

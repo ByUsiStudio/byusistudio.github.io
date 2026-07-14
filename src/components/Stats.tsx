@@ -105,7 +105,7 @@ export function Stats({ repos }: StatsProps) {
         .stats-container {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 20px;
+          gap: 25px;
           margin-bottom: 40px;
         }
 
@@ -113,47 +113,74 @@ export function Stats({ repos }: StatsProps) {
           background: rgba(255, 255, 255, 0.7);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
-          border-radius: 12px;
-          padding: 25px;
+          border-radius: 16px;
+          padding: 30px;
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
           border: 1px solid rgba(255, 255, 255, 0.5);
           text-align: center;
-          transition: all 0.3s ease;
+          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
           opacity: 0;
-          transform: translateY(30px);
+          transform: translateY(35px) scale(0.95);
+          will-change: transform, box-shadow;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .stat-card::after {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle, rgba(52, 152, 219, 0.1) 0%, transparent 70%);
+          opacity: 0;
+          transition: opacity 0.4s ease;
         }
 
         .stats-container.animated .stat-card {
           opacity: 1;
-          transform: translateY(0);
-          animation: slideUp 0.6s ease-out forwards;
+          transform: translateY(0) scale(1);
+          animation: statSlideUp 0.7s var(--ease-out-back) forwards;
         }
 
         .stat-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+          transform: translateY(-8px) scale(1.02);
+          box-shadow: 0 15px 45px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card:hover::after {
+          opacity: 1;
         }
 
         .stat-number {
-          font-size: 36px;
-          font-weight: 700;
+          font-size: 42px;
+          font-weight: 800;
           color: ${theme.primary};
-          margin-bottom: 10px;
+          margin-bottom: 12px;
+          transition: color 0.3s ease;
+          display: inline-block;
+        }
+
+        .stat-card:hover .stat-number {
+          color: ${theme.accent};
+          transform: scale(1.05);
         }
 
         .stat-label {
           color: ${theme['dark-gray']};
-          font-size: 14px;
+          font-size: 15px;
+          font-weight: 500;
         }
 
-        @keyframes slideUp {
+        @keyframes statSlideUp {
           from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(35px) scale(0.95);
           }
           to {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
           }
         }
 

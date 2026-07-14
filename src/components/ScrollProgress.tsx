@@ -33,15 +33,34 @@ export function ScrollProgress() {
           top: 0;
           left: 0;
           width: 100%;
-          height: 3px;
-          background: transparent;
+          height: 4px;
+          background: rgba(0, 0, 0, 0.05);
           z-index: 9999;
         }
 
         .scroll-progress-bar {
           height: 100%;
-          transition: width 0.2s ease-out;
-          border-radius: 0 2px 2px 0;
+          transition: width 0.15s cubic-bezier(0.215, 0.61, 0.355, 1);
+          border-radius: 0 4px 4px 0;
+          box-shadow: 0 0 10px currentColor;
+          position: relative;
+        }
+
+        .scroll-progress-bar::after {
+          content: '';
+          position: absolute;
+          right: 0;
+          top: 0;
+          width: 12px;
+          height: 100%;
+          background: inherit;
+          border-radius: 50%;
+          transform: scale(0);
+          transition: transform 0.2s ease;
+        }
+
+        .scroll-progress-bar:hover::after {
+          transform: scale(1);
         }
       `}</style>
     </div>
