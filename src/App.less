@@ -2042,49 +2042,73 @@ a {
 @keyframes cookiePanelSlideIn {
   0% {
     opacity: 0;
-    transform: translateX(-30px) scale(0.92);
-    filter: blur(8px);
+    transform: translateX(-40px) translateY(20px) scale(0.85) rotate(-3deg);
+    filter: blur(10px);
   }
-  60% {
+  50% {
     opacity: 1;
-    transform: translateX(4px) scale(1.01);
+    transform: translateX(6px) translateY(-4px) scale(1.03) rotate(1deg);
     filter: blur(0);
+  }
+  75% {
+    transform: translateX(-2px) translateY(2px) scale(0.99) rotate(-0.5deg);
   }
   100% {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: translateX(0) translateY(0) scale(1) rotate(0);
     filter: blur(0);
   }
 }
 
-@keyframes cookieGlowBreath {
+// 按钮浮动 + 呼吸光晕 + 轻微摇摆
+@keyframes cookieToggleFloat {
   0%, 100% {
+    transform: translateY(0) rotate(0deg);
     box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.18),
-      0 0 0 1px rgba(255, 255, 255, 0.25) inset,
-      0 0 20px rgba(var(--primary-rgb), 0.15);
+      0 8px 24px rgba(0, 0, 0, 0.28),
+      0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+      0 0 20px rgba(var(--primary-rgb), 0.2);
+  }
+  25% {
+    transform: translateY(-4px) rotate(-5deg);
+    box-shadow:
+      0 14px 32px rgba(0, 0, 0, 0.32),
+      0 0 0 1px rgba(255, 255, 255, 0.35) inset,
+      0 0 28px rgba(var(--primary-rgb), 0.4);
   }
   50% {
+    transform: translateY(-2px) rotate(0deg);
     box-shadow:
-      0 12px 40px rgba(0, 0, 0, 0.22),
+      0 11px 28px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.3) inset,
+      0 0 35px rgba(var(--primary-rgb), 0.5);
+  }
+  75% {
+    transform: translateY(-4px) rotate(5deg);
+    box-shadow:
+      0 14px 32px rgba(0, 0, 0, 0.32),
       0 0 0 1px rgba(255, 255, 255, 0.35) inset,
-      0 0 35px rgba(var(--primary-rgb), 0.3);
+      0 0 28px rgba(var(--primary-rgb), 0.4);
   }
 }
 
 @keyframes cookieScanMove {
   0% {
-    transform: translateY(-100%);
+    transform: translateY(-100%) skewX(-20deg);
     opacity: 0;
   }
-  20% {
+  15% {
     opacity: 1;
   }
-  80% {
+  50% {
+    transform: translateY(200%) skewX(20deg);
+    opacity: 1;
+  }
+  85% {
     opacity: 1;
   }
   100% {
-    transform: translateY(400%);
+    transform: translateY(500%) skewX(-20deg);
     opacity: 0;
   }
 }
@@ -2092,15 +2116,67 @@ a {
 @keyframes cookieStatSpring {
   0% {
     opacity: 0;
-    transform: translateY(12px) scale(0.85);
+    transform: translateY(14px) scale(0.8) rotate(-2deg);
   }
-  60% {
+  55% {
     opacity: 1;
-    transform: translateY(-3px) scale(1.05);
+    transform: translateY(-5px) scale(1.08) rotate(1deg);
+  }
+  75% {
+    transform: translateY(2px) scale(0.97) rotate(-0.5deg);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0) scale(1) rotate(0);
+  }
+}
+
+// 详情行错落入场
+@keyframes cookieRowSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// IP 行流光扫过
+@keyframes cookieIpShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// 主数值轻脉冲
+@keyframes cookieValuePulse {
+  0%, 100% {
+    transform: scale(1);
+    text-shadow: 0 0 8px rgba(var(--primary-rgb), 0.3);
+  }
+  50% {
+    transform: scale(1.06);
+    text-shadow: 0 0 16px rgba(var(--primary-rgb), 0.7);
+  }
+}
+
+@keyframes cookieHeaderGradient {
+  0%, 100% {
+    background-position: 0% 50%;
+    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.35);
+  }
+  50% {
+    background-position: 100% 50%;
+    box-shadow: 0 6px 18px rgba(var(--accent-rgb), 0.5);
   }
 }
 
@@ -2111,7 +2187,6 @@ a {
   z-index: 1000;
   will-change: transform, opacity;
 
-  // 触发按钮（高斯模糊底）
   .cookie-toggle {
     position: relative;
     width: 54px;
@@ -2130,15 +2205,23 @@ a {
     box-shadow:
       0 8px 24px rgba(0, 0, 0, 0.28),
       0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-    transition: transform 0.4s @ease-out-back, box-shadow 0.4s ease;
-    animation: cookieGlowBreath 3s ease-in-out infinite;
+    animation: cookieToggleFloat 4s ease-in-out infinite;
+
+    // 图标随按钮反向轻摆，增强灵动感
+    i {
+      animation: cookieToggleFloat 4s ease-in-out infinite reverse;
+      display: inline-block;
+    }
 
     &:hover {
-      transform: scale(1.08) rotate(-8deg);
+      animation-play-state: paused;
+      transform: scale(1.12) rotate(-10deg);
+      transition: transform 0.3s @ease-out-back;
     }
 
     &:active {
-      transform: scale(0.96);
+      transform: scale(0.94);
+      transition: transform 0.15s ease;
     }
   }
 
@@ -2183,7 +2266,7 @@ a {
     visibility: visible;
     transform: translateX(0) scale(1);
     pointer-events: auto;
-    animation: cookiePanelSlideIn 0.5s @ease-out-back;
+    animation: cookiePanelSlideIn 0.7s @ease-out-back;
   }
 
   .cookie-panel-header {
@@ -2205,7 +2288,9 @@ a {
       font-size: 16px;
       color: #fff;
       background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.85), rgba(var(--accent-rgb), 0.75));
+      background-size: 200% 200%;
       box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.35);
+      animation: cookieHeaderGradient 4s ease-in-out infinite;
     }
 
     .cookie-header-text {
@@ -2296,12 +2381,18 @@ a {
         font-size: 18px;
         font-weight: 700;
         color: #fff;
+        display: inline-block;
       }
 
       .cookie-stat-label {
         font-size: 10px;
         color: rgba(255, 255, 255, 0.7);
       }
+    }
+
+    &.primary-stat .cookie-stat-value {
+      animation: cookieValuePulse 2.4s ease-in-out infinite;
+      animation-delay: 0.8s;
     }
   }
 
@@ -2323,10 +2414,33 @@ a {
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.07);
     font-size: 12px;
+    opacity: 0;
+    animation: cookieRowSlide 0.5s @ease-out-quart forwards;
+
+    &:nth-child(1) {
+      animation-delay: 0.25s;
+    }
+    &:nth-child(2) {
+      animation-delay: 0.35s;
+    }
+    &:nth-child(3) {
+      animation-delay: 0.45s;
+    }
 
     &.ip-row {
-      background: rgba(var(--primary-rgb), 0.2);
+      background:
+        linear-gradient(
+          110deg,
+          rgba(var(--primary-rgb), 0.2) 0%,
+          rgba(var(--primary-rgb), 0.45) 45%,
+          rgba(255, 255, 255, 0.25) 50%,
+          rgba(var(--primary-rgb), 0.45) 55%,
+          rgba(var(--primary-rgb), 0.2) 100%
+        );
+      background-size: 200% 100%;
       border: 1px solid rgba(var(--primary-rgb), 0.4);
+      animation: cookieRowSlide 0.5s @ease-out-quart 0.25s forwards,
+        cookieIpShimmer 3s linear 0.8s infinite;
     }
 
     .cookie-detail-label {
