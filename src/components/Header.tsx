@@ -26,8 +26,11 @@ export function Header() {
     <nav
       className="navbar"
       style={{
-        backgroundColor: `${theme['card-bg']}dd`,
-        boxShadow: theme.shadow,
+        backgroundColor: `${theme['card-bg']}cc`,
+        boxShadow: `0 4px 30px rgba(0, 0, 0, 0.08)`,
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderBottom: `1px solid rgba(255, 255, 255, 0.1)`,
       }}
     >
       <div className="navbar-container">
@@ -81,7 +84,6 @@ export function Header() {
           left: 0;
           width: 100%;
           z-index: 1000;
-          backdrop-filter: blur(5px);
         }
 
         .navbar-container {
@@ -120,6 +122,12 @@ export function Header() {
           border-radius: 4px;
           display: flex;
           align-items: center;
+          transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+          background: rgba(52, 152, 219, 0.1);
+          color: ${theme.primary};
         }
 
         .nav-links a i {
@@ -162,7 +170,10 @@ export function Header() {
             top: ${navbar.height}px;
             left: 0;
             width: 100%;
-            background: ${theme['card-bg']};
+            background: ${theme['card-bg']}dd;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             flex-direction: column;
             padding: 20px;
             box-shadow: ${theme.shadow};

@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useUiConfig } from '../context/UiConfigContext';
 import type { Repo } from '../types/ui';
@@ -14,6 +14,28 @@ interface ProjectsProps {
 export function Projects({ repos, loading, error }: ProjectsProps) {
   const { theme } = useTheme();
   const { config } = useUiConfig();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasAnimated.current) {
+            hasAnimated.current = true;
+            entry.target.classList.add('animated');
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   if (!config) return null;
 
@@ -181,9 +203,13 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
           </div>
         ) : (
           <>
-            <div className="project-list">
-              {paginatedRepos.map((repo) => (
-                <div key={repo.id} className="project-item">
+            <div ref={containerRef} className="project-list scroll-animate">
+              {paginatedRepos.map((repo, index) => (
+                <div
+                  key={repo.id}
+                  className="project-item"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
                   <div className="project-item-header">
                     <div className="project-icon">
                       <i className={getRepoIcon(repo)}></i>
@@ -333,9 +359,12 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
         }
 
         .project-list {
-          background: ${theme['card-bg']};
-          border-radius: 8px;
-          box-shadow: ${theme.shadow};
+          background: rgba(255, 255, 255, 0.7);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border-radius: 12px;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.5);
           overflow: hidden;
         }
 
@@ -345,6 +374,20 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
           display: flex;
           align-items: center;
           justify-content: space-between;
+          transition: all 0.3s ease;
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+
+        .project-list.animated .project-item {
+          opacity: 1;
+          transform: translateX(0);
+          animation: slideInRight 0.5s ease-out forwards;
+        }
+
+        .project-item:hover {
+          background: rgba(52, 152, 219, 0.05);
+          padding-left: 35px;
         }
 
         .project-item:last-child {
@@ -518,6 +561,42 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
         .empty-state h3 {
           margin-bottom: 10px;
           color: ${theme.secondary};
+        }
+
+        @keyframes slideInRight {
+          from {
+            opacity: 0;
+            transform: translateX(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        .project-link {
+          transition: all 0.3s ease;
+        }
+
+        .project-link:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+        }
+
+        .filter-btn {
+          transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover:not(.active) {
+          border-color: ${theme.primary};
+          color: ${theme.primary};
+          transform: translateY(-1px);
+        }
+
+        .page-btn:hover:not(:disabled) {
+          border-color: ${theme.primary};
+          color: ${theme.primary};
+          transform: translateY(-1px);
         }
       `}</style>
     </section>
