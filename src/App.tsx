@@ -7,7 +7,7 @@ import { Hero } from './components/Hero';
 import { Stats } from './components/Stats';
 import { Projects } from './components/Projects';
 import { Team } from './components/Team';
-import { Contact } from './components/Contact';
+
 import { Footer } from './components/Footer';
 import { ScrollProgress } from './components/ScrollProgress';
 import { BackToTop } from './components/BackToTop';
@@ -69,7 +69,7 @@ function AppContent() {
       {layout.stats.show && <Stats repos={repos} loading={loading} error={error} />}
       {layout.projects.show && <Projects repos={repos} loading={loading} error={error} />}
       {layout.team.show && <Team />}
-      {layout.contact.show && <Contact />}
+      
       {layout.footer.show && <Footer repos={repos} />}
       <BackToTop />
     </ThemeProvider>

@@ -63,7 +63,6 @@
       "links": [
         { "href": "#home", "icon": "fas fa-home", "label": "首页" },
         { "href": "#projects", "icon": "fas fa-code", "label": "项目" },
-        { "href": "#contact", "icon": "fas fa-envelope", "label": "联系我们" },
         { "href": "https://gitee.com/byusiteam", "icon": "fas fa-book", "label": "文档", "external": true},
         { "href": "https://moebun.com/aff/EBBZFNWQ", "icon": "fas fa-cloud", "label": "小兔互联", "external": true },
         { "href": "https://server.cdifit.cn", "icon": "fas fa-bolt", "label": "ByUsi Studio服务器监控", "external": true }
@@ -111,26 +110,6 @@
         { "icon": "fas fa-lightbulb", "title": "创新驱动", "description": "持续探索新技术，解决实际问题，创造有价值的开源解决方案。" },
         { "icon": "fas fa-share-alt", "title": "开放共享", "description": "坚持开放源代码原则，促进技术透明度和社区参与度。" }
       ]
-    },
-    "contact": {
-      "show": true,
-      "title": "联系我们",
-      "subtitle": "有任何问题或建议？欢迎与我们联系！",
-      "form": {
-        "nameLabel": "姓名",
-        "emailLabel": "邮箱",
-        "subjectLabel": "主题",
-        "messageLabel": "留言内容",
-        "submitButtonText": "发送留言",
-        "successMessage": "感谢您的留言！我们会尽快回复您。"
-      },
-      "contacts": [
-        { "icon": "fab fa-gitee", "label": "Gitee", "value": "gitee.com/byusistudio", "href": "https://gitee.com/byusistudio" },
-        { "icon": "fas fa-envelope", "label": "邮箱", "value": "admin@work.cdifit.cn" },
-        { "icon": "fas fa-globe", "label": "官网", "value": "about.cdifit.cn", "href": "https://about.cdifit.cn" }
-      ],
-      "showMessages": true,
-      "maxDisplayMessages": 10
     },
     "footer": {
       "show": true,

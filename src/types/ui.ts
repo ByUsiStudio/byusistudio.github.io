@@ -100,37 +100,6 @@ export interface TeamConfig {
   items: TeamItemConfig[];
 }
 
-export interface ContactConfig {
-  show: boolean;
-  title: string;
-  subtitle: string;
-  form: {
-    nameLabel: string;
-    emailLabel: string;
-    subjectLabel: string;
-    messageLabel: string;
-    submitButtonText: string;
-    successMessage: string;
-  };
-  contacts: Array<{
-    icon: string;
-    label: string;
-    value: string;
-    href?: string;
-  }>;
-  showMessages: boolean;
-  maxDisplayMessages: number;
-}
-
-export interface ContactMessage {
-  id: string;
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  createdAt: string;
-}
-
 export interface FooterLink {
   label: string;
   href: string;
@@ -155,7 +124,6 @@ export interface LayoutConfig {
   stats: StatsConfig;
   projects: ProjectsConfig;
   team: TeamConfig;
-  contact: ContactConfig;
   footer: FooterConfig;
 }
 
