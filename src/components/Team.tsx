@@ -42,22 +42,28 @@ export function Team() {
         '--accent': theme.accent,
         '--dark-gray': theme['dark-gray'],
         '--light-gray': theme['light-gray'],
+        '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
       } as React.CSSProperties}
     >
       <div className="layui-container">
         <h2 className="section-title scroll-animate">{team.title}</h2>
+        <div className="team-grid-bg"></div>
         <div ref={containerRef} className="team-grid scroll-animate">
           {team.items.map((item, index) => (
             <div
               key={index}
               className="team-card"
-              style={{ animationDelay: `${index * 200}ms` }}
+              style={{ animationDelay: `${index * 150}ms` }}
             >
-              <div className="team-icon">
-                <i className={item.icon}></i>
+              <div className="team-card-glow"></div>
+              <div className="team-card-inner">
+                <div className="team-icon">
+                  <div className="team-icon-ring"></div>
+                  <i className={item.icon}></i>
+                </div>
+                <h3 className="team-title">{item.title}</h3>
+                <p className="team-description">{item.description}</p>
               </div>
-              <h3 className="team-title">{item.title}</h3>
-              <p className="team-description">{item.description}</p>
             </div>
           ))}
         </div>

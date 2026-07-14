@@ -1495,20 +1495,53 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: all 0.4s @ease-out-cubic;
   opacity: 0;
   transform: translateX(-30px);
-  will-change: transform, background, box-shadow;
-
-  &:hover {
-    background: rgba(var(--primary-rgb), 0.08);
-    padding-left: 38px;
-    transform: translateX(5px);
-    box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.1);
-  }
+  will-change: transform;
+  position: relative;
+  overflow: hidden;
 
   &:last-child {
     border-bottom: none;
+  }
+
+  .project-glow-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 4px;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.3), transparent, rgba(var(--primary-rgb), 0.1));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    animation: borderFlow 8s ease infinite;
+    background-size: 200% 200%;
+  }
+
+  &:hover .project-glow-border {
+    opacity: 1;
+  }
+
+  .project-item-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-left: 0;
+    transition: all 0.4s @ease-out-cubic;
+  }
+
+  &:hover .project-item-inner {
+    padding-left: 10px;
+    transform: translateX(5px);
   }
 
   .project-item-header {
@@ -1521,17 +1554,30 @@ a {
   .project-icon {
     width: 40px;
     height: 40px;
-    background: linear-gradient(135deg, var(--primary), #2ecc71);
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-right: 15px;
     flex-shrink: 0;
+    position: relative;
+
+    .project-icon-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, var(--primary), rgba(var(--primary-rgb), 0.6));
+      border-radius: 8px;
+      animation: breathe 3s ease-in-out infinite;
+    }
 
     i {
       color: white;
       font-size: 18px;
+      position: relative;
+      z-index: 1;
     }
   }
 
@@ -1642,7 +1688,7 @@ a {
 .project-list.animated .project-item {
   opacity: 1;
   transform: translateX(0);
-  animation: slideInRight 0.6s @ease-out-quart;
+  animation: slideScaleIn 0.7s @ease-out-back;
 }
 
 .pagination {
@@ -1748,6 +1794,19 @@ a {
 
 #team {
   background: var(--light-gray);
+  position: relative;
+}
+
+.team-grid-bg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(ellipse, rgba(var(--primary-rgb), 0.05) 0%, transparent 60%);
+  border-radius: 50%;
+  z-index: 0;
 }
 
 .team-grid {
@@ -1758,6 +1817,8 @@ a {
   transform: translateY(40px);
   transition: all 0.7s @ease-out-quart;
   will-change: opacity, transform;
+  position: relative;
+  z-index: 1;
 
   &.animated {
     opacity: 1;
@@ -1774,49 +1835,66 @@ a {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.5);
   text-align: center;
-  transition: all 0.4s @ease-out-back;
   opacity: 0;
   transform: scale(0.85) translateY(20px);
-  will-change: transform, box-shadow;
+  will-change: transform;
   position: relative;
   overflow: hidden;
 
-  &::before {
-    content: '';
+  .team-card-glow {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--primary), transparent);
-    transform: scaleX(0);
-    transition: transform 0.4s ease;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150%;
+    height: 150%;
+    background: radial-gradient(circle, rgba(var(--primary-rgb), 0.05) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
   }
 
-  &:hover {
-    transform: translateY(-10px) scale(1.03);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+  &:hover .team-card-glow {
+    opacity: 1;
+  }
 
-    &::before {
-      transform: scaleX(1);
-    }
-
-    .team-icon {
-      transform: scale(1.15) rotate(8deg);
-      color: var(--accent);
-    }
-
-    .team-title {
-      color: var(--primary);
-    }
+  .team-card-inner {
+    position: relative;
+    z-index: 2;
   }
 
   .team-icon {
     font-size: 44px;
     color: var(--primary);
     margin-bottom: 20px;
-    transition: all 0.4s @ease-out-back;
     display: inline-block;
+    position: relative;
+
+    .team-icon-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      border: 2px solid rgba(var(--primary-rgb), 0.3);
+      border-radius: 50%;
+      animation: glowRing 4s ease-in-out infinite;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+  }
+
+  &:hover .team-icon {
+    transform: scale(1.15) rotate(8deg);
+    color: var(--accent);
+
+    .team-icon-ring {
+      opacity: 0.8;
+    }
+  }
+
+  &:hover .team-title {
+    color: var(--primary);
   }
 
   .team-title {
@@ -1836,7 +1914,7 @@ a {
 .team-grid.animated .team-card {
   opacity: 1;
   transform: scale(1) translateY(0);
-  animation: scaleInUp 0.6s @ease-out-back;
+  animation: spring 0.8s @ease-out-back;
 }
 
 .footer {

@@ -237,57 +237,61 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
                   className="project-item"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className="project-item-header">
-                    <div className="project-icon">
-                      <i className={getRepoIcon(repo)}></i>
-                    </div>
-                    <div className="project-info">
-                      <div className="project-name">
-                        <a href={repo.html_url} target="_blank" rel="noopener noreferrer">
-                          {repo.name}
-                        </a>
-                        {repo.archived && <span className="project-badge archived">归档</span>}
-                        {repo.language && <span className="project-badge">{repo.language}</span>}
+                  <div className="project-glow-border"></div>
+                  <div className="project-item-inner">
+                    <div className="project-item-header">
+                      <div className="project-icon">
+                        <div className="project-icon-bg"></div>
+                        <i className={getRepoIcon(repo)}></i>
                       </div>
-                      <div className="project-description">
-                        {repo.description || '该项目暂无描述信息'}
-                      </div>
-                      <div className="project-meta">
-                        <div className="meta-item">
-                          <i className="fas fa-star"></i>
-                          <span>{repo.stargazers_count.toLocaleString()}</span>
+                      <div className="project-info">
+                        <div className="project-name">
+                          <a href={repo.html_url} target="_blank" rel="noopener noreferrer">
+                            {repo.name}
+                          </a>
+                          {repo.archived && <span className="project-badge archived">归档</span>}
+                          {repo.language && <span className="project-badge">{repo.language}</span>}
                         </div>
-                        <div className="meta-item">
-                          <i className="fas fa-code-branch"></i>
-                          <span>{repo.forks_count.toLocaleString()}</span>
+                        <div className="project-description">
+                          {repo.description || '该项目暂无描述信息'}
                         </div>
-                        <div className="meta-item">
-                          <i className="fas fa-clock"></i>
-                          <span>更新于 {getTimeText(repo.updated_at)}</span>
-                        </div>
-                        {repo.open_issues_count > 0 && (
+                        <div className="project-meta">
                           <div className="meta-item">
-                            <i className="fas fa-exclamation-circle"></i>
-                            <span>{repo.open_issues_count}个问题</span>
+                            <i className="fas fa-star"></i>
+                            <span>{repo.stargazers_count.toLocaleString()}</span>
                           </div>
-                        )}
+                          <div className="meta-item">
+                            <i className="fas fa-code-branch"></i>
+                            <span>{repo.forks_count.toLocaleString()}</span>
+                          </div>
+                          <div className="meta-item">
+                            <i className="fas fa-clock"></i>
+                            <span>更新于 {getTimeText(repo.updated_at)}</span>
+                          </div>
+                          {repo.open_issues_count > 0 && (
+                            <div className="meta-item">
+                              <i className="fas fa-exclamation-circle"></i>
+                              <span>{repo.open_issues_count}个问题</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="project-links">
-                    <a href={repo.html_url} className="project-link" target="_blank" rel="noopener noreferrer">
-                      <i className="fas fa-external-link-alt"></i>访问
-                    </a>
-                    {repo.has_issues && (
-                      <a
-                        href={`${repo.html_url}/issues`}
-                        className="project-link issue"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <i className="fas fa-bug"></i>问题
+                    <div className="project-links">
+                      <a href={repo.html_url} className="project-link" target="_blank" rel="noopener noreferrer">
+                        <i className="fas fa-external-link-alt"></i>访问
                       </a>
-                    )}
+                      {repo.has_issues && (
+                        <a
+                          href={`${repo.html_url}/issues`}
+                          className="project-link issue"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <i className="fas fa-bug"></i>问题
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
