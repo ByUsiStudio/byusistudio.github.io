@@ -96,22 +96,6 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
     return `${Math.floor(timeDiff / 365)}年前`;
   }, []);
 
-  const getRepoIcon = useCallback((repo: Repo) => {
-    const name = repo.name.toLowerCase();
-    const desc = (repo.description || '').toLowerCase();
-
-    if (name.includes('os') || desc.includes('操作系统')) return 'fas fa-laptop-code';
-    if (name.includes('ui') || name.includes('frontend') || desc.includes('前端')) return 'fas fa-palette';
-    if (name.includes('api') || name.includes('backend') || desc.includes('后端')) return 'fas fa-server';
-    if (name.includes('lib') || name.includes('library') || desc.includes('库')) return 'fas fa-book';
-    if (name.includes('tool') || name.includes('utility') || desc.includes('工具')) return 'fas fa-tools';
-    if (name.includes('mobile') || desc.includes('移动')) return 'fas fa-mobile-alt';
-    if (name.includes('web') || desc.includes('网站')) return 'fas fa-globe';
-    if (name.includes('data') || desc.includes('数据')) return 'fas fa-database';
-    if (name.includes('ai') || desc.includes('智能')) return 'fas fa-robot';
-    return 'fab fa-git-alt';
-  }, []);
-
   if (loading) {
     return (
       <section
@@ -240,9 +224,6 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
                   <div className="project-glow-border"></div>
                   <div className="project-item-inner">
                     <div className="project-item-header">
-                      <div className="project-icon">
-                        <i className={getRepoIcon(repo)}></i>
-                      </div>
                       <div className="project-info">
                         <div className="project-name">
                           <a href={repo.html_url} target="_blank" rel="noopener noreferrer">
