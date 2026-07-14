@@ -14,7 +14,7 @@ import { BackToTop } from './components/BackToTop';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { fetchRepos } from './services/api';
 import type { Repo } from './types/ui';
-import './App.css';
+import './App.less';
 
 function AppContent() {
   const [repos, setRepos] = useState<Repo[]>([]);
