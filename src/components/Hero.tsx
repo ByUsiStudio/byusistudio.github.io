@@ -25,13 +25,14 @@ export function Hero() {
         '--secondary': theme.secondary,
         '--dark-gray': theme['dark-gray'],
         '--bg-color': theme['bg-color'],
+        '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
       } as React.CSSProperties}
     >
       <div className="hero-particles">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(25)].map((_, i) => (
           <div
             key={i}
-            className="particle"
+            className={`particle ${i % 3 === 0 ? 'animate-float-random' : ''}`}
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -44,19 +45,26 @@ export function Hero() {
         ))}
       </div>
 
-      <div className="hero-glow"></div>
+      <div className="hero-glow animate-breathe"></div>
+      <div className="hero-glow-ring"></div>
+      <div className="hero-glow-ring hero-glow-ring-delay"></div>
+
+      <div className="hero-scan-line"></div>
 
       <div className="layui-container">
         <div className="hero-content">
-          <h1 className="hero-title animate-blur-in">{hero.title}</h1>
-          <p className="hero-subtitle animate-fade-in-up delay-300">{hero.subtitle}</p>
+          <h1 className="hero-title animate-spring">
+            {hero.title}
+            <span className="hero-title-cursor"></span>
+          </h1>
+          <p className="hero-subtitle animate-step-in delay-300">{hero.subtitle}</p>
           <div className="hero-buttons">
             {hero.buttons.map((btn, idx) =>
               btn.action === 'scrollToProjects' ? (
                 <button
                   key={idx}
-                  className={`btn ${btn.primary ? 'btn-primary' : 'btn-outline'} animate-scale-in-up`}
-                  style={{ animationDelay: `${500 + idx * 150}ms` }}
+                  className={`btn ${btn.primary ? 'btn-primary' : 'btn-outline'} animate-slide-scale-in`}
+                  style={{ animationDelay: `${400 + idx * 150}ms` }}
                   onClick={scrollToProjects}
                 >
                   <i className={btn.icon}></i>
@@ -66,8 +74,8 @@ export function Hero() {
                 <a
                   key={idx}
                   href={btn.href}
-                  className={`btn ${btn.primary ? 'btn-primary' : 'btn-outline'} animate-scale-in-up`}
-                  style={{ animationDelay: `${500 + idx * 150}ms` }}
+                  className={`btn ${btn.primary ? 'btn-primary' : 'btn-outline'} animate-slide-scale-in`}
+                  style={{ animationDelay: `${400 + idx * 150}ms` }}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -79,7 +87,7 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="hero-scroll-indicator animate-float-slow">
+        <div className="hero-scroll-indicator animate-wave">
           <i className="fas fa-chevron-down"></i>
         </div>
       </div>

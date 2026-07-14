@@ -9,30 +9,34 @@ interface StatsProps {
   error: string | null;
 }
 
-function AnimatedNumber({ value, duration = 2000 }: { value: string | number; duration?: number }) {
+function AnimatedNumber({ value, duration = 2000, delay = 0 }: { value: string | number; duration?: number; delay?: number }) {
   const [displayValue, setDisplayValue] = useState(0);
   const parsedValue = typeof value === 'string' ? parseInt(value.replace(/,/g, ''), 10) : value;
   const hasAnimated = useRef(false);
 
   useEffect(() => {
     if (hasAnimated.current) return;
-    hasAnimated.current = true;
+    
+    const timer = setTimeout(() => {
+      hasAnimated.current = true;
+      let startTime: number | null = null;
 
-    let startTime: number | null = null;
+      const animate = (currentTime: number) => {
+        if (!startTime) startTime = currentTime;
+        const progress = Math.min((currentTime - startTime) / duration, 1);
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        setDisplayValue(Math.floor(easeOutQuart * parsedValue));
 
-    const animate = (currentTime: number) => {
-      if (!startTime) startTime = currentTime;
-      const progress = Math.min((currentTime - startTime) / duration, 1);
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      setDisplayValue(Math.floor(easeOutQuart * parsedValue));
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
 
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
+      requestAnimationFrame(animate);
+    }, delay);
 
-    requestAnimationFrame(animate);
-  }, [parsedValue, duration]);
+    return () => clearTimeout(timer);
+  }, [parsedValue, duration, delay]);
 
   return <span>{displayValue.toLocaleString()}</span>;
 }
@@ -96,17 +100,22 @@ export function Stats({ repos }: StatsProps) {
       } as React.CSSProperties}
     >
       <div className="layui-container">
+        <div className="stats-glow-bg"></div>
         <div ref={containerRef} className="stats-container scroll-animate">
           {statsConfig.cards.map((card, index) => (
             <div
               key={card.key}
               className="stat-card"
-              style={{ animationDelay: `${index * 100}ms` }}
+              style={{ animationDelay: `${index * 150}ms` }}
             >
-              <div className="stat-number">
-                <AnimatedNumber value={valueMap[card.key] ?? 0} />
+              <div className="stat-card-inner">
+                <div className="stat-number">
+                  <AnimatedNumber value={valueMap[card.key] ?? 0} delay={index * 150} />
+                </div>
+                <div className="stat-label">{card.label}</div>
               </div>
-              <div className="stat-label">{card.label}</div>
+              <div className="stat-card-ring"></div>
+              <div className="stat-card-ring stat-card-ring-delay"></div>
             </div>
           ))}
         </div>
