@@ -61,11 +61,6 @@ export function BackToTop() {
           transform: translateY(0);
         }
 
-        .back-to-top:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
-        }
-
         @media (max-width: 768px) {
           .back-to-top {
             width: 45px;

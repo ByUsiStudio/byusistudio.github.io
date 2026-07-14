@@ -128,7 +128,9 @@
         { "icon": "fab fa-gitee", "label": "Gitee", "value": "gitee.com/byusistudio", "href": "https://gitee.com/byusistudio" },
         { "icon": "fas fa-envelope", "label": "邮箱", "value": "admin@work.cdifit.cn" },
         { "icon": "fas fa-globe", "label": "官网", "value": "about.cdifit.cn", "href": "https://about.cdifit.cn" }
-      ]
+      ],
+      "showMessages": true,
+      "maxDisplayMessages": 10
     },
     "footer": {
       "show": true,

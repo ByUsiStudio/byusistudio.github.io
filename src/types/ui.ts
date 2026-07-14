@@ -118,6 +118,17 @@ export interface ContactConfig {
     value: string;
     href?: string;
   }>;
+  showMessages: boolean;
+  maxDisplayMessages: number;
+}
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  createdAt: string;
 }
 
 export interface FooterLink {

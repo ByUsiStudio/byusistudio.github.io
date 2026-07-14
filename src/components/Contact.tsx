@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useUiConfig } from '../context/UiConfigContext';
+import type { ContactMessage } from '../types/ui';
+
+const STORAGE_KEY = 'byusi_contact_messages';
 
 export function Contact() {
   const { theme } = useTheme();
@@ -17,6 +20,26 @@ export function Contact() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
+
+  useEffect(() => {
+    const savedMessages = localStorage.getItem(STORAGE_KEY);
+    if (savedMessages) {
+      try {
+        setMessages(JSON.parse(savedMessages));
+      } catch {
+        setMessages([]);
+      }
+    }
+  }, []);
+
+  const saveMessages = (newMessages: ContactMessage[]) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newMessages));
+    } catch (err) {
+      console.error('保存留言失败:', err);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -27,13 +50,43 @@ export function Contact() {
     e.preventDefault();
     setSubmitting(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const newMessage: ContactMessage = {
+      id: Date.now().toString(),
+      name: formData.name,
+      email: formData.email,
+      subject: formData.subject,
+      message: formData.message,
+      createdAt: new Date().toISOString(),
+    };
+
+    const newMessages = [newMessage, ...messages].slice(0, contactConfig.maxDisplayMessages);
+    setMessages(newMessages);
+    saveMessages(newMessages);
 
     setSubmitting(false);
     setSubmitted(true);
     setFormData({ name: '', email: '', subject: '', message: '' });
 
     setTimeout(() => setSubmitted(false), 5000);
+  };
+
+  const deleteMessage = (id: string) => {
+    const newMessages = messages.filter((msg) => msg.id !== id);
+    setMessages(newMessages);
+    saveMessages(newMessages);
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   return (
@@ -150,6 +203,33 @@ export function Contact() {
             </form>
           </div>
         </div>
+
+        {contactConfig.showMessages && messages.length > 0 && (
+          <div className="contact-messages">
+            <h3>历史留言</h3>
+            <div className="messages-list">
+              {messages.map((msg) => (
+                <div key={msg.id} className="message-item">
+                  <div className="message-header">
+                    <div className="message-info">
+                      <span className="message-name">{msg.name}</span>
+                      <span className="message-date">{formatDate(msg.createdAt)}</span>
+                    </div>
+                    <button
+                      className="delete-btn"
+                      onClick={() => deleteMessage(msg.id)}
+                      aria-label="删除留言"
+                    >
+                      <i className="fas fa-trash"></i>
+                    </button>
+                  </div>
+                  <div className="message-subject">{msg.subject}</div>
+                  <div className="message-content">{msg.message}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <style>{`
@@ -171,6 +251,7 @@ export function Contact() {
           display: grid;
           grid-template-columns: 1fr 1.5fr;
           gap: 40px;
+          margin-bottom: 50px;
         }
 
         .contact-info {
@@ -233,10 +314,6 @@ export function Contact() {
         .contact-value a {
           color: ${theme.primary};
           text-decoration: none;
-        }
-
-        .contact-value a:hover {
-          text-decoration: underline;
         }
 
         .contact-form-container {
@@ -314,12 +391,6 @@ export function Contact() {
           transition: all 0.3s ease;
         }
 
-        .submit-btn:hover:not(:disabled) {
-          background: ${theme['primary-dark']};
-          transform: translateY(-2px);
-          box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
-        }
-
         .submit-btn:disabled {
           opacity: 0.7;
           cursor: not-allowed;
@@ -337,6 +408,78 @@ export function Contact() {
           font-size: 14px;
         }
 
+        .contact-messages {
+          background: ${theme['card-bg']};
+          padding: 30px;
+          border-radius: 8px;
+          box-shadow: ${theme.shadow};
+        }
+
+        .contact-messages h3 {
+          color: ${theme.secondary};
+          margin-bottom: 20px;
+          font-size: 20px;
+        }
+
+        .messages-list {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .message-item {
+          padding: 15px;
+          background: ${theme['bg-color']};
+          border-radius: 6px;
+          border: 1px solid ${theme['border-color']};
+        }
+
+        .message-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+        }
+
+        .message-info {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .message-name {
+          font-weight: 600;
+          color: ${theme.secondary};
+          font-size: 15px;
+        }
+
+        .message-date {
+          font-size: 12px;
+          color: ${theme['dark-gray']};
+        }
+
+        .delete-btn {
+          background: transparent;
+          border: none;
+          color: ${theme.accent};
+          cursor: pointer;
+          padding: 5px;
+          font-size: 14px;
+        }
+
+        .message-subject {
+          font-weight: 500;
+          color: ${theme.primary};
+          font-size: 14px;
+          margin-bottom: 8px;
+        }
+
+        .message-content {
+          color: ${theme['text-color']};
+          font-size: 14px;
+          line-height: 1.6;
+        }
+
         @media (max-width: 992px) {
           .contact-content {
             grid-template-columns: 1fr;
@@ -349,7 +492,8 @@ export function Contact() {
 
         @media (max-width: 576px) {
           .contact-info,
-          .contact-form-container {
+          .contact-form-container,
+          .contact-messages {
             padding: 20px;
           }
         }
