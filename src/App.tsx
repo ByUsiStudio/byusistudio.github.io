@@ -11,6 +11,7 @@ import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
 import { ScrollProgress } from './components/ScrollProgress';
 import { BackToTop } from './components/BackToTop';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { fetchRepos } from './services/api';
 import type { Repo } from './types/ui';
 import './App.css';
@@ -78,7 +79,9 @@ function AppContent() {
 function App() {
   return (
     <UiConfigProvider>
-      <AppContent />
+      <ErrorBoundary>
+        <AppContent />
+      </ErrorBoundary>
     </UiConfigProvider>
   );
 }
