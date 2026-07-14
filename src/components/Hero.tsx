@@ -1,5 +1,6 @@
 import { useTheme } from '../context/ThemeContext';
 import { useUiConfig } from '../context/UiConfigContext';
+import { Typewriter } from './Typewriter';
 
 export function Hero() {
   const { theme } = useTheme();
@@ -54,8 +55,7 @@ export function Hero() {
       <div className="layui-container">
         <div className="hero-content">
           <h1 className="hero-title animate-spring">
-            {hero.title}
-            <span className="hero-title-cursor"></span>
+            <Typewriter text={hero.title} speed={180} delay={300} />
           </h1>
           <p className="hero-subtitle animate-step-in delay-300">{hero.subtitle}</p>
           <div className="hero-buttons">
