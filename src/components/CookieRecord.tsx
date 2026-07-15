@@ -4,7 +4,7 @@ import { useCookieRecord } from '../hooks/useCookieRecord';
 
 export function CookieRecord() {
   const { theme } = useTheme();
-  const { record, clearRecord } = useCookieRecord();
+  const { record, ipStatus, refreshIp, clearRecord } = useCookieRecord();
   const [expanded, setExpanded] = useState(false);
 
   // 计算陪伴天数
@@ -95,12 +95,20 @@ export function CookieRecord() {
         </div>
 
         <div className="cookie-detail-list">
-          <div className="cookie-detail-row ip-row">
+          <div
+            className={`cookie-detail-row ip-row ip-${ipStatus}`}
+            onClick={ipStatus === 'error' ? refreshIp : undefined}
+            role={ipStatus === 'error' ? 'button' : undefined}
+            title={ipStatus === 'error' ? '点击重试' : undefined}
+          >
             <span className="cookie-detail-label">
-              <i className="fas fa-globe"></i> 当前 IP
+              <i className={`fas ${ipStatus === 'loading' ? 'fa-circle-notch fa-spin' : 'fa-globe'}`}></i> 当前 IP
             </span>
             <span className="cookie-detail-value ip-value">
-              {record.ip || '获取中...'}
+              {ipStatus === 'loading' && '获取中...'}
+              {ipStatus === 'success' && record.ip}
+              {ipStatus === 'error' && '获取失败 · 重试'}
+              {ipStatus === 'idle' && '—'}
             </span>
           </div>
           <div className="cookie-detail-row">

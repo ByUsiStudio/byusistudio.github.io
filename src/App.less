@@ -2644,6 +2644,35 @@ a {
         cookieIpShimmer 3s linear 0.8s infinite;
     }
 
+    // 加载态：弱化流光
+    &.ip-loading {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      animation: cookieRowSlide 0.5s @ease-out-quart 0.25s forwards;
+
+      .ip-value {
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+
+    // 失败态：强调色 + 可点击
+    &.ip-error {
+      background: rgba(var(--accent-rgb), 0.22);
+      border-color: rgba(var(--accent-rgb), 0.55);
+      animation: cookieRowSlide 0.5s @ease-out-quart 0.25s forwards;
+      cursor: pointer;
+      transition: transform 0.3s @ease-out-back, background 0.3s ease;
+
+      &:hover {
+        transform: translateX(3px) scale(1.02);
+        background: rgba(var(--accent-rgb), 0.38);
+      }
+
+      .ip-value {
+        color: #ffd9d4;
+      }
+    }
+
     .cookie-detail-label {
       display: flex;
       align-items: center;
