@@ -32,6 +32,9 @@ class ErrorBoundaryComponent extends Component<Props, State> {
       errorInfo,
     });
     console.error('Error Boundary caught an error:', error, errorInfo);
+    setTimeout(() => {
+      window.location.href = '/error.html?code=500';
+    }, 500);
   }
 
   componentDidUpdate(prevProps: Props) {

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>出错了 - ByUsi Studio</title>
+  <link rel="stylesheet" href="/Font/css/all.css">
+  <style id="themeStyles">
+    :root {
+      --primary: #3498db;
+      --primary-rgb: 52, 152, 219;
+      --accent: #e74c3c;
+      --accent-rgb: 231, 76, 60;
+      --bg-color: #0a0a1a;
+      --card-bg: rgba(26, 26, 46, 0.85);
+      --text-color: #ffffff;
+      --secondary: #2c3e50;
+      --light-gray: #f5f7fa;
+      --dark-gray: #666;
+      --border-color: #eee;
+      --shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Chocolate Classical Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(var(--primary-rgb), 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 50%, rgba(var(--accent-rgb), 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 20%, rgba(var(--primary-rgb), 0.08) 0%, transparent 40%);
+      pointer-events: none;
+      z-index: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .error-container {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .error-glass {
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(var(--primary-rgb), 0.22);
+      border-radius: 24px;
+      padding: 60px 50px;
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.3),
+        0 1px 0 rgba(255, 255, 255, 0.15) inset;
+      text-align: center;
+      max-width: 520px;
+      width: 100%;
+      animation: errorSpring 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+    }
+
+    .error-icon-wrap {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 30px;
+    }
+
+    .error-icon-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px solid rgba(var(--primary-rgb), 0.4);
+      animation: errorRingPulse 2.4s ease-in-out infinite;
+    }
+
+    .error-icon-ring:nth-child(2) {
+      animation-delay: -1.2s;
+      border-color: rgba(var(--accent-rgb), 0.3);
+    }
+
+    .error-icon {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 56px;
+      color: var(--primary);
+      animation: errorIconFloat 3s ease-in-out infinite;
+      transition: color 0.5s ease;
+    }
+
+    .error-code {
+      font-size: 56px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+      animation: errorCodeGlow 2s ease-in-out infinite;
+    }
+
+    .error-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 12px;
+      animation: errorSlideUp 0.6s ease-out 0.2s both;
+      transition: color 0.5s ease;
+    }
+
+    .error-desc {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.6;
+      margin-bottom: 32px;
+      animation: errorSlideUp 0.6s ease-out 0.35s both;
+      transition: color 0.5s ease;
+    }
+
+    .redirect-info {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 28px;
+      animation: errorSlideUp 0.6s ease-out 0.5s both;
+      transition: color 0.5s ease;
+    }
+
+    .redirect-countdown {
+      display: inline-block;
+      min-width: 28px;
+      padding: 2px 8px;
+      background: rgba(var(--primary-rgb), 0.18);
+      border-radius: 6px;
+      font-weight: 600;
+      color: var(--primary);
+      animation: countdownPulse 1s ease-in-out infinite;
+      transition: background 0.5s ease, color 0.5s ease;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      animation: errorSlideUp 0.6s ease-out 0.65s both;
+    }
+
+    .btn {
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.35s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.3);
+      transition: background 0.5s ease, box-shadow 0.5s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 12px 30px rgba(var(--primary-rgb), 0.5);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid rgba(var(--primary-rgb), 0.5);
+      transition: background 0.5s ease, border-color 0.5s ease, color 0.5s ease;
+    }
+
+    .btn-outline:hover {
+      background: rgba(var(--primary-rgb), 0.12);
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 8px 20px rgba(var(--primary-rgb), 0.25);
+    }
+
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(var(--primary-rgb), 0.6);
+      border-radius: 50%;
+      animation: particleFloat 8s ease-in-out infinite;
+      transition: background 0.5s ease;
+    }
+
+    .particle:nth-child(odd) {
+      background: rgba(var(--accent-rgb), 0.5);
+      animation-duration: 10s;
+    }
+
+    .particle:nth-child(3n) {
+      width: 6px;
+      height: 6px;
+      animation-duration: 7s;
+    }
+
+    @keyframes errorSpring {
+      0% {
+        opacity: 0;
+        transform: scale(0.7) translateY(30px);
+      }
+      50% {
+        transform: scale(1.05) translateY(-8px);
+      }
+      70% {
+        transform: scale(0.97) translateY(3px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes errorRingPulse {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0.6;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.15);
+        opacity: 0.2;
+      }
+    }
+
+    @keyframes errorIconFloat {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg);
+      }
+      25% {
+        transform: translateY(-8px) rotate(-3deg);
+      }
+      50% {
+        transform: translateY(-4px) rotate(0deg);
+      }
+      75% {
+        transform: translateY(-8px) rotate(3deg);
+      }
+    }
+
+    @keyframes errorCodeGlow {
+      0%, 100% {
+        filter: drop-shadow(0 0 8px rgba(var(--primary-rgb), 0.3));
+      }
+      50% {
+        filter: drop-shadow(0 0 16px rgba(var(--primary-rgb), 0.6));
+      }
+    }
+
+    @keyframes errorSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes countdownPulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.4);
+      }
+      50% {
+        transform: scale(1.08);
+        box-shadow: 0 0 0 6px rgba(var(--primary-rgb), 0);
+      }
+    }
+
+    @keyframes particleFloat {
+      0% {
+        transform: translateY(100vh) translateX(0) scale(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.5;
+        transform: translateY(80vh) translateX(10px) scale(1);
+      }
+      50% {
+        opacity: 0.35;
+        transform: translateY(50vh) translateX(-15px) scale(0.8);
+      }
+      90% {
+        opacity: 0.25;
+        transform: translateY(10vh) translateX(5px) scale(0.6);
+      }
+      100% {
+        transform: translateY(-10vh) translateX(0) scale(0);
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .error-glass {
+        padding: 40px 25px;
+        border-radius: 18px;
+      }
+
+      .error-icon-wrap {
+        width: 90px;
+        height: 90px;
+        margin-bottom: 24px;
+      }
+
+      .error-icon {
+        font-size: 42px;
+      }
+
+      .error-code {
+        font-size: 40px;
+      }
+
+      .error-title {
+        font-size: 20px;
+      }
+
+      .btn-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn {
+        justify-content: center;
+      }
+    }
+
+    .theme-light body {
+      --bg-color: #f8fbff;
+      --text-color: #333;
+      --card-bg: #ffffff;
+    }
+
+    .theme-light .error-glass {
+      background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.04) 100%);
+      border-color: rgba(var(--primary-rgb), 0.15);
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.1),
+        0 1px 0 rgba(255, 255, 255, 0.8) inset;
+    }
+
+    .theme-light .error-desc,
+    .theme-light .redirect-info {
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    .theme-light .particle {
+      background: rgba(var(--primary-rgb), 0.35);
+    }
+
+    .theme-light .particle:nth-child(odd) {
+      background: rgba(var(--accent-rgb), 0.3);
+    }
+
+    .theme-light body::before {
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="particles">
+    <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+    <div class="particle" style="left: 25%; animation-delay: 1.5s;"></div>
+    <div class="particle" style="left: 40%; animation-delay: 3s;"></div>
+    <div class="particle" style="left: 55%; animation-delay: 0.8s;"></div>
+    <div class="particle" style="left: 70%; animation-delay: 2.2s;"></div>
+    <div class="particle" style="left: 85%; animation-delay: 4s;"></div>
+    <div class="particle" style="left: 15%; animation-delay: 2.8s;"></div>
+    <div class="particle" style="left: 80%; animation-delay: 1.2s;"></div>
+  </div>
+
+  <div class="error-container">
+    <div class="error-glass">
+      <div class="error-icon-wrap">
+        <div class="error-icon-ring"></div>
+        <div class="error-icon-ring"></div>
+        <div class="error-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+      </div>
+
+      <div class="error-code" id="errorCode">404</div>
+      <h1 class="error-title" id="errorTitle">页面未找到</h1>
+      <p class="error-desc" id="errorDesc">
+        抱歉，您访问的页面不存在或已被移动。<br>
+        可能是网址输入错误，或者该页面已被删除。
+      </p>
+
+      <p class="redirect-info">
+        将在 <span class="redirect-countdown" id="countdown">10</span> 秒后自动返回首页
+      </p>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="goHome()">
+          <i class="fas fa-home"></i> 返回首页
+        </button>
+        <button class="btn btn-outline" onclick="goBack()">
+          <i class="fas fa-arrow-left"></i> 返回上页
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ERROR_CONFIG = {
+      '404': {
+        title: '页面未找到',
+        desc: '抱歉，您访问的页面不存在或已被移动。<br>可能是网址输入错误，或者该页面已被删除。',
+        icon: 'fa-exclamation-triangle'
+      },
+      '500': {
+        title: '服务器错误',
+        desc: '抱歉，服务器内部出现错误。<br>请稍后重试，或联系管理员获取帮助。',
+        icon: 'fa-server'
+      },
+      '403': {
+        title: '访问被拒绝',
+        desc: '抱歉，您没有权限访问此页面。<br>请检查您的登录状态或联系管理员。',
+        icon: 'fa-shield-halved'
+      },
+      '400': {
+        title: '请求错误',
+        desc: '抱歉，您的请求格式不正确。<br>请检查输入内容后重试。',
+        icon: 'fa-circle-exclamation'
+      },
+      '503': {
+        title: '服务暂时不可用',
+        desc: '抱歉，服务正在维护中。<br>请稍后再试，感谢您的耐心等待。',
+        icon: 'fa-clock'
+      }
+    };
+
+    function getQueryParam(key) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(key);
+    }
+
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '52, 152, 219';
+    }
+
+    async function loadThemeFromConfig() {
+      try {
+        const response = await fetch('/ui.json');
+        if (!response.ok) throw new Error('Failed to load config');
+        const config = await response.json();
+        
+        if (config && config.light) {
+          const theme = config.light;
+          const root = document.documentElement;
+          
+          if (theme.primary) {
+            root.style.setProperty('--primary', theme.primary);
+            root.style.setProperty('--primary-rgb', hexToRgb(theme.primary));
+          }
+          if (theme.accent) {
+            root.style.setProperty('--accent', theme.accent);
+            root.style.setProperty('--accent-rgb', hexToRgb(theme.accent));
+          }
+          if (theme['bg-color']) {
+            root.style.setProperty('--bg-color', theme['bg-color']);
+          }
+          if (theme['text-color']) {
+            root.style.setProperty('--text-color', theme['text-color']);
+          }
+          if (theme['card-bg']) {
+            root.style.setProperty('--card-bg', theme['card-bg']);
+          }
+          if (theme.secondary) {
+            root.style.setProperty('--secondary', theme.secondary);
+          }
+          if (theme['light-gray']) {
+            root.style.setProperty('--light-gray', theme['light-gray']);
+          }
+          if (theme['dark-gray']) {
+            root.style.setProperty('--dark-gray', theme['dark-gray']);
+          }
+          if (theme['border-color']) {
+            root.style.setProperty('--border-color', theme['border-color']);
+          }
+          if (theme.shadow) {
+            root.style.setProperty('--shadow', theme.shadow);
+          }
+          if (theme.transition) {
+            root.style.setProperty('--transition', theme.transition);
+          }
+
+          if (theme['bg-color'] && theme['bg-color'].startsWith('#f')) {
+            document.body.classList.add('theme-light');
+          }
+
+          if (config.head && config.head.title) {
+            const currentTitle = document.title;
+            const baseTitle = config.head.title;
+            if (currentTitle.includes('出错了')) {
+              document.title = currentTitle.replace('ByUsi Studio', baseTitle.split(' - ')[0] || baseTitle);
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to load theme from ui.json, using defaults:', error);
+      }
+    }
+
+    function initErrorPage() {
+      const code = getQueryParam('code') || '404';
+      const title = getQueryParam('title');
+      const desc = getQueryParam('desc');
+
+      const config = ERROR_CONFIG[code] || ERROR_CONFIG['404'];
+
+      const codeEl = document.getElementById('errorCode');
+      const titleEl = document.getElementById('errorTitle');
+      const descEl = document.getElementById('errorDesc');
+      const iconEl = document.querySelector('.error-icon i');
+
+      if (codeEl) codeEl.textContent = code;
+      if (titleEl) titleEl.textContent = title || config.title;
+      if (descEl) descEl.innerHTML = desc || config.desc;
+      if (iconEl) iconEl.className = `fas ${config.icon}`;
+
+      const pageTitle = `${code} ${config.title} - ByUsi Studio`;
+      document.title = pageTitle;
+    }
+
+    let countdown = 10;
+    const countdownEl = document.getElementById('countdown');
+
+    function updateCountdown() {
+      countdown--;
+      if (countdownEl) {
+        countdownEl.textContent = countdown;
+      }
+      if (countdown > 0) {
+        setTimeout(updateCountdown, 1000);
+      } else {
+        goHome();
+      }
+    }
+
+    function goHome() {
+      window.location.href = '/';
+    }
+
+    function goBack() {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        goHome();
+      }
+    }
+
+    initErrorPage();
+    loadThemeFromConfig();
+    setTimeout(updateCountdown, 1000);
+  </script>
+</body>
+</html>
