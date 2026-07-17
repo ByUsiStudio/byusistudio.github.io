@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useUiConfig } from '../context/UiConfigContext';
+import { ReadmeModal } from './ReadmeModal';
+import { fetchReadme } from '../services/api';
 import type { Repo } from '../types/ui';
 
 type FilterType = 'all' | 'recent' | 'popular' | 'forked' | 'stars' | 'archived';
@@ -19,6 +21,7 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [animateKey, setAnimateKey] = useState(0);
+  const [selectedRepo, setSelectedRepo] = useState<Repo | null>(null);
 
   useEffect(() => {
     setAnimateKey((prev) => prev + 1);
@@ -144,21 +147,22 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
   }
 
   return (
-    <section
-      id="projects"
-      className="section"
-      style={{
-        '--primary': theme.primary,
-        '--secondary': theme.secondary,
-        '--accent': theme.accent,
-        '--dark-gray': theme['dark-gray'],
-        '--text-color': theme['text-color'],
-        '--card-bg': theme['card-bg'],
-        '--border-color': theme['border-color'],
-        '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
-        '--accent-rgb': theme.accent.replace(/[rgb()]/g, ''),
-      } as React.CSSProperties}
-    >
+    <>
+      <section
+        id="projects"
+        className="section"
+        style={{
+          '--primary': theme.primary,
+          '--secondary': theme.secondary,
+          '--accent': theme.accent,
+          '--dark-gray': theme['dark-gray'],
+          '--text-color': theme['text-color'],
+          '--card-bg': theme['card-bg'],
+          '--border-color': theme['border-color'],
+          '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
+          '--accent-rgb': theme.accent.replace(/[rgb()]/g, ''),
+        } as React.CSSProperties}
+      >
       <div className="layui-container">
         <h2 className="section-title">{projectsConfig.title}</h2>
 
@@ -245,6 +249,9 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
                       <a href={repo.html_url} className="project-link" target="_blank" rel="noopener noreferrer">
                         <i className="fas fa-external-link-alt"></i>访问
                       </a>
+                      <button className="project-link readme" onClick={() => setSelectedRepo(repo)}>
+                        <i className="fas fa-file-alt"></i>README
+                      </button>
                       {repo.has_issues && (
                         <a
                           href={`${repo.html_url}/issues`}
@@ -262,29 +269,40 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
             </div>
 
             {totalPages > 1 && (
-              <div className="pagination">
-                <button
-                  className="page-btn"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage((prev) => prev - 1)}
-                >
-                  <i className="fas fa-chevron-left"></i> 上一页
-                </button>
-                <span className="page-info">
-                  第 {currentPage} 页 / 共 {totalPages} 页
-                </span>
-                <button
-                  className="page-btn"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage((prev) => prev + 1)}
-                >
-                  下一页 <i className="fas fa-chevron-right"></i>
-                </button>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    </section>
+            <div className="pagination">
+              <button
+                className="page-btn"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
+              >
+                <i className="fas fa-chevron-left"></i> 上一页
+              </button>
+              <span className="page-info">
+                第 {currentPage} 页 / 共 {totalPages} 页
+              </span>
+              <button
+                className="page-btn"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
+              >
+                下一页 <i className="fas fa-chevron-right"></i>
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  </section>
+
+  {selectedRepo && (
+        <ReadmeModal
+          repoName={selectedRepo.name}
+          repoFullName={selectedRepo.full_name}
+          repoUrl={selectedRepo.html_url}
+          onFetch={fetchReadme}
+          onClose={() => setSelectedRepo(null)}
+        />
+      )}
+    </>
   );
 }

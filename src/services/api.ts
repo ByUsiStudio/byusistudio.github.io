@@ -23,6 +23,7 @@ interface CacheData {
 }
 
 const CACHE_KEY = 'byusi_repos_cache';
+const README_CACHE_KEY_PREFIX = 'byusi_readme_cache_';
 
 function getCache(cacheLifetime: number): Repo[] | null {
   try {
@@ -96,6 +97,86 @@ export async function fetchRepos(): Promise<Repo[]> {
     } catch {
       // ignore
     }
+    throw error;
+  }
+}
+
+interface ReadmeCacheData {
+  content: string;
+  timestamp: number;
+}
+
+function getReadmeCache(repoFullName: string, cacheLifetime: number): string | null {
+  try {
+    const key = `${README_CACHE_KEY_PREFIX}${repoFullName}`;
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const cache: ReadmeCacheData = JSON.parse(raw);
+    if (Date.now() - cache.timestamp > cacheLifetime) return null;
+    return cache.content;
+  } catch {
+    return null;
+  }
+}
+
+function setReadmeCache(repoFullName: string, content: string) {
+  try {
+    const key = `${README_CACHE_KEY_PREFIX}${repoFullName}`;
+    localStorage.setItem(key, JSON.stringify({ content, timestamp: Date.now() }));
+  } catch {
+    // storage might be full
+  }
+}
+
+interface GiteeReadmeResponse {
+  content: string;
+  encoding: string;
+}
+
+export async function fetchReadme(repoFullName: string): Promise<string> {
+  const config = await loadApiConfig();
+  const CACHE_LIFETIME = config.api.cacheLifetime * 1000;
+
+  const cached = getReadmeCache(repoFullName, CACHE_LIFETIME);
+  if (cached) return cached;
+
+  const { baseUrl, accessToken } = config.api;
+  const url = `${baseUrl}/repos/${repoFullName}/readme?access_token=${accessToken}`;
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'ByUsi-Readme-Fetcher/1.0',
+        Accept: 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data: GiteeReadmeResponse = await response.json();
+
+    let content = data.content;
+    if (data.encoding === 'base64') {
+      try {
+        const binary = atob(data.content);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        content = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+      } catch {
+        content = data.content;
+      }
+    }
+
+    setReadmeCache(repoFullName, content);
+    return content;
+  } catch (error) {
+    console.error(`Failed to fetch README for ${repoFullName}:`, error);
+    const cached = getReadmeCache(repoFullName, CACHE_LIFETIME * 24);
+    if (cached) return cached;
     throw error;
   }
 }
