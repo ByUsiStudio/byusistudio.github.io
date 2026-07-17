@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import hljs from 'highlight.js';
+import 'highlight.js/styles/github-dark.css';
 
 interface ReadmeModalProps {
   repoName: string;
@@ -14,6 +16,31 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
   const [loading, setLoading] = useState(true);
   const [content, setContent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const markdownRef = useRef<HTMLDivElement>(null);
+  const codeBlocksRef = useRef<{ code: string; lang: string }[]>([]);
+
+  const handleCopy = useCallback(async (code: string, index: number) => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(code);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = code;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        textarea.style.top = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } catch (err) {
+      console.error('复制失败:', err);
+    }
+  }, []);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -27,6 +54,7 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
     let cancelled = false;
     setLoading(true);
     setError(null);
+    codeBlocksRef.current = [];
 
     onFetch(repoFullName)
       .then((readmeContent) => {
@@ -50,11 +78,57 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
     };
   }, [repoFullName, onFetch]);
 
+  useEffect(() => {
+    if (!markdownRef.current) return;
+
+    const codeBlocks = markdownRef.current.querySelectorAll('pre code');
+    codeBlocks.forEach((codeBlock, index) => {
+      const parentPre = codeBlock.parentElement as HTMLPreElement;
+      const langClass = codeBlock.className || '';
+      const match = langClass.match(/language-(\w+)/);
+      const lang = match ? match[1] : 'plaintext';
+      const code = codeBlock.textContent || '';
+
+      codeBlocksRef.current[index] = { code, lang };
+
+      try {
+        hljs.highlightElement(codeBlock as HTMLElement);
+      } catch (err) {
+        console.warn('代码高亮失败:', err);
+      }
+
+      const existingBtn = parentPre.querySelector('.copy-btn');
+      if (!existingBtn) {
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+        copyBtn.onclick = () => handleCopy(code, index);
+        parentPre.appendChild(copyBtn);
+      }
+    });
+  }, [content, handleCopy]);
+
+  useEffect(() => {
+    if (!markdownRef.current) return;
+
+    const copyBtns = markdownRef.current.querySelectorAll('.copy-btn');
+    copyBtns.forEach((btn, index) => {
+      const icon = btn.querySelector('i');
+      if (copiedIndex === index) {
+        btn.classList.add('copied');
+        if (icon) icon.className = 'fas fa-check';
+      } else {
+        btn.classList.remove('copied');
+        if (icon) icon.className = 'fas fa-copy';
+      }
+    });
+  }, [copiedIndex]);
+
   const renderMarkdown = useCallback(() => {
     if (!content) return null;
     const html = marked(content) as string;
     const sanitized = DOMPurify.sanitize(html);
-    return <div dangerouslySetInnerHTML={{ __html: sanitized }} />;
+    return <div ref={markdownRef} className="readme-markdown-full" dangerouslySetInnerHTML={{ __html: sanitized }} />;
   }, [content]);
 
   return (
@@ -82,9 +156,7 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
               <p>{error}</p>
             </div>
           ) : content ? (
-            <div className="readme-markdown-full">
-              {renderMarkdown()}
-            </div>
+            renderMarkdown()
           ) : (
             <div className="readme-empty">
               <i className="fas fa-file-alt"></i>
