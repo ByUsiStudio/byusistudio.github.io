@@ -3534,6 +3534,27 @@ a {
       max-width: 300px;
     }
   }
+
+  .project-item {
+    .project-item-inner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    &:hover .project-item-inner {
+      padding-left: 0;
+      transform: translateX(0);
+    }
+
+    .project-links {
+      margin-left: 0;
+      margin-top: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color);
+      width: 100%;
+    }
+  }
 }
 
 @media (max-width: 576px) {
