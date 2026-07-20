@@ -2,8 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5780;
@@ -46,29 +50,29 @@ app.get('/api/repos', async (req, res) => {
   }
 });
 
-app.get('/api/repos/:fullName/readme', async (req, res) => {
+app.get('/api/repos/*/readme', async (req, res) => {
   try {
     if (!GITEE_ACCESS_TOKEN) {
       return res.status(500).json({ error: 'Gitee access token not configured' });
     }
 
-    const { fullName } = req.params;
+    const fullName = req.params[0];
     const url = `${GITEE_API_BASE}/repos/${fullName}/readme?access_token=${GITEE_ACCESS_TOKEN}`;
     const data = await fetchFromGitee(url);
 
     res.json(data);
   } catch (error) {
-    console.error(`Error fetching README for ${req.params.fullName}:`, error);
+    console.error(`Error fetching README for ${req.params[0]}:`, error);
     res.status(500).json({ error: 'Failed to fetch README' });
   }
 });
 
-app.use(express.static(path.join(path.dirname(new URL(import.meta.url).pathname), '../dist')));
+app.use(express.static(path.join(__dirname, '../dist')));
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(path.dirname(new URL(import.meta.url).pathname), '../dist', 'index.html'));
+  res.sendFile(path.join(__dirname, '../dist', 'index.html'));
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://0.0.0.0:${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
