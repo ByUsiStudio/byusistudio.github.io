@@ -4,16 +4,16 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-dotenv.config();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 5780;
 
 const GITEE_API_BASE = 'https://gitee.com/api/v5';
-const GITEE_ORG_NAME = process.env.GITEE_ORG_NAME || 'byusi';
+const GITEE_ORG_NAME = process.env.GITEE_ORG_NAME || 'byusistudio';
 const GITEE_ACCESS_TOKEN = process.env.GITEE_ACCESS_TOKEN;
 
 app.use(cors());
@@ -60,7 +60,10 @@ app.get('/api/repos/*/readme', async (req, res) => {
     const url = `${GITEE_API_BASE}/repos/${fullName}/readme?access_token=${GITEE_ACCESS_TOKEN}`;
     const data = await fetchFromGitee(url);
 
-    res.json(data);
+    res.json({
+      ...data,
+      repoFullName: fullName,
+    });
   } catch (error) {
     console.error(`Error fetching README for ${req.params[0]}:`, error);
     res.status(500).json({ error: 'Failed to fetch README' });
