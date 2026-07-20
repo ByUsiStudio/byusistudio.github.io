@@ -73,33 +73,34 @@ function AppContent() {
     return <div>配置加载失败</div>;
   }
 
+  if (isLoading) {
+    return (
+      <div className="app-loading-overlay">
+        <div className="loading-spinner"></div>
+        <p>加载中...</p>
+      </div>
+    );
+  }
+
   const { layout } = config;
 
   return (
-    <>
-      {isLoading && (
-        <div className="app-loading-overlay">
-          <div className="loading-spinner"></div>
-          <p>加载中...</p>
-        </div>
-      )}
-      <ThemeProvider>
-        <div className="app-content-wrapper">
-          <HeadConfig />
-          <MouseFollower />
-          <ScrollProgress />
-          {layout.navbar.sticky && <Header />}
-          {layout.hero.show && <Hero />}
-          {layout.stats.show && <Stats repos={repos} loading={dataLoading} error={error} />}
-          {layout.projects.show && <Projects repos={repos} loading={dataLoading} error={error} />}
-          {layout.team.show && <Team />}
-          
-          {layout.footer.show && <Footer repos={repos} />}
-          <BackToTop />
-          <CookieRecord />
-        </div>
-      </ThemeProvider>
-    </>
+    <ThemeProvider>
+      <div className="app-content-wrapper">
+        <HeadConfig />
+        <MouseFollower />
+        <ScrollProgress />
+        {layout.navbar.sticky && <Header />}
+        {layout.hero.show && <Hero />}
+        {layout.stats.show && <Stats repos={repos} loading={dataLoading} error={error} />}
+        {layout.projects.show && <Projects repos={repos} loading={dataLoading} error={error} />}
+        {layout.team.show && <Team />}
+        
+        {layout.footer.show && <Footer repos={repos} />}
+        <BackToTop />
+        <CookieRecord />
+      </div>
+    </ThemeProvider>
   );
 }
 
