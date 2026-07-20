@@ -107,7 +107,9 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
     imgs.forEach((img) => {
       const src = img.getAttribute('src');
       if (src) {
-        img.setAttribute('src', convertPath(src));
+        const fullPath = convertPath(src);
+        img.setAttribute('data-src', fullPath);
+        img.removeAttribute('src');
         img.classList.add('readme-image');
       }
     });
@@ -164,7 +166,10 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
 
     const fetchAndConvertImages = async () => {
       const fetchPromises = imgElements.map(async (imgEl) => {
-        const originalSrc = imgEl.src;
+        const originalSrc = imgEl.getAttribute('data-src');
+        if (!originalSrc) {
+          return { imgEl, originalSrc: '', blobUrl: null, success: false, fromCache: false };
+        }
         
         const cachedUrl = blobCacheRef.current.get(originalSrc);
         if (cachedUrl) {
