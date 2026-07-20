@@ -44,6 +44,10 @@ body {
   z-index: 9999;
   gap: 16px;
 
+  &.fade-out {
+    animation: fadeOut 0.6s @ease-out-quart forwards;
+  }
+
   .loading-spinner {
     width: 50px;
     height: 50px;
@@ -58,6 +62,11 @@ body {
     color: var(--text-color);
     opacity: 0.7;
   }
+}
+
+.app-content-wrapper {
+  opacity: 0;
+  animation: fadeInUp 0.8s @ease-out-back forwards;
 }
 
 a {

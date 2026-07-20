@@ -20,26 +20,27 @@ import './App.less';
 
 function AppContent() {
   const [repos, setRepos] = useState<Repo[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [resourcesLoaded, setResourcesLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { config, loading: configLoading } = useUiConfig();
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
+    setDataLoading(true);
     setError(null);
 
     fetchRepos()
       .then((data) => {
         if (!cancelled) {
           setRepos(data);
-          setLoading(false);
+          setDataLoading(false);
         }
       })
       .catch((err) => {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : '未知错误');
-          setLoading(false);
+          setDataLoading(false);
         }
       });
 
@@ -48,14 +49,25 @@ function AppContent() {
     };
   }, []);
 
-  if (configLoading || loading) {
-    return (
-      <div className="app-loading-overlay">
-        <div className="loading-spinner"></div>
-        <p>加载中...</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const waitForResources = async () => {
+      const fontPromise = document.fonts?.ready || Promise.resolve();
+      const loadPromise = new Promise<void>((resolve) => {
+        if (document.readyState === 'complete') {
+          resolve();
+        } else {
+          window.addEventListener('load', () => resolve(), { once: true });
+        }
+      });
+
+      await Promise.all([fontPromise, loadPromise]);
+      setResourcesLoaded(true);
+    };
+
+    waitForResources();
+  }, []);
+
+  const isLoading = configLoading || dataLoading || !resourcesLoaded;
 
   if (!config) {
     return <div>配置加载失败</div>;
@@ -64,20 +76,30 @@ function AppContent() {
   const { layout } = config;
 
   return (
-    <ThemeProvider>
-      <HeadConfig />
-      <MouseFollower />
-      <ScrollProgress />
-      {layout.navbar.sticky && <Header />}
-      {layout.hero.show && <Hero />}
-      {layout.stats.show && <Stats repos={repos} loading={loading} error={error} />}
-      {layout.projects.show && <Projects repos={repos} loading={loading} error={error} />}
-      {layout.team.show && <Team />}
-      
-      {layout.footer.show && <Footer repos={repos} />}
-      <BackToTop />
-      <CookieRecord />
-    </ThemeProvider>
+    <>
+      {isLoading && (
+        <div className="app-loading-overlay">
+          <div className="loading-spinner"></div>
+          <p>加载中...</p>
+        </div>
+      )}
+      <ThemeProvider>
+        <div className="app-content-wrapper">
+          <HeadConfig />
+          <MouseFollower />
+          <ScrollProgress />
+          {layout.navbar.sticky && <Header />}
+          {layout.hero.show && <Hero />}
+          {layout.stats.show && <Stats repos={repos} loading={dataLoading} error={error} />}
+          {layout.projects.show && <Projects repos={repos} loading={dataLoading} error={error} />}
+          {layout.team.show && <Team />}
+          
+          {layout.footer.show && <Footer repos={repos} />}
+          <BackToTop />
+          <CookieRecord />
+        </div>
+      </ThemeProvider>
+    </>
   );
 }
 

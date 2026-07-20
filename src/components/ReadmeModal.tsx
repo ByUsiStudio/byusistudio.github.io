@@ -18,7 +18,8 @@ interface ReadmeModalProps {
 }
 
 export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose }: ReadmeModalProps) {
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [imagesLoading, setImagesLoading] = useState(true);
   const [content, setContent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -105,7 +106,8 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
+    setDataLoading(true);
+    setImagesLoading(true);
     setError(null);
     codeBlocksRef.current = [];
 
@@ -119,11 +121,12 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
       .catch((err) => {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : '获取 README 失败');
+          setImagesLoading(false);
         }
       })
       .finally(() => {
         if (!cancelled) {
-          setLoading(false);
+          setDataLoading(false);
         }
       });
 
@@ -136,20 +139,41 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
     if (!markdownRef.current) return;
 
     const images = markdownRef.current.querySelectorAll('img.readme-image');
+    
+    if (images.length === 0) {
+      setImagesLoading(false);
+      return;
+    }
+
+    let loadedCount = 0;
+    const totalImages = images.length;
+
+    const checkAllLoaded = () => {
+      loadedCount++;
+      if (loadedCount >= totalImages) {
+        setImagesLoading(false);
+      }
+    };
+
     images.forEach((img) => {
       const imgEl = img as HTMLImageElement;
-      if (!imgEl.complete) {
-        imgEl.classList.add('image-loading');
+      imgEl.classList.add('image-loading');
+      
+      if (imgEl.complete) {
+        imgEl.classList.remove('image-loading');
+        imgEl.classList.add(imgEl.naturalWidth === 0 ? 'image-error' : 'image-loaded');
+        checkAllLoaded();
+      } else {
         imgEl.onload = () => {
           imgEl.classList.remove('image-loading');
           imgEl.classList.add('image-loaded');
+          checkAllLoaded();
         };
         imgEl.onerror = () => {
           imgEl.classList.remove('image-loading');
           imgEl.classList.add('image-error');
+          checkAllLoaded();
         };
-      } else {
-        imgEl.classList.add('image-loaded');
       }
     });
   }, [content]);
@@ -223,10 +247,10 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
         </div>
 
         <div className="readme-modal-body">
-          {loading ? (
+          {dataLoading || imagesLoading ? (
             <div className="readme-loading">
               <div className="loading-spinner"></div>
-              <p>正在加载 README...</p>
+              <p>{dataLoading ? '正在加载 README...' : '正在加载图片...'}</p>
             </div>
           ) : error ? (
             <div className="readme-error">
