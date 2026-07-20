@@ -1,8 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <style>
+        .no-js-warning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            z-index: 99999;
+        }
+        .no-js-warning .icon {
+            font-size: 64px;
+            color: #e74c3c;
+            margin-bottom: 24px;
+            animation: pulse 2s infinite;
+        }
+        .no-js-warning h1 {
+            color: #ffffff;
+            font-size: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        .no-js-warning p {
+            color: #bdc3c7;
+            font-size: 16px;
+            line-height: 1.6;
+            max-width: 400px;
+        }
+        .no-js-warning .browser-list {
+            margin-top: 24px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .no-js-warning .browser-item {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #ecf0f1;
+            font-size: 14px;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
 </head>
 <body>
+    <noscript>
+        <div class="no-js-warning">
+            <div class="icon">⚠️</div>
+            <h1>请启用 JavaScript</h1>
+            <p>本网站需要 JavaScript 才能正常运行。请在浏览器设置中启用 JavaScript，然后刷新页面。</p>
+            <div class="browser-list">
+                <div class="browser-item">Chrome</div>
+                <div class="browser-item">Firefox</div>
+                <div class="browser-item">Safari</div>
+                <div class="browser-item">Edge</div>
+            </div>
+        </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
 </body>
