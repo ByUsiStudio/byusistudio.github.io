@@ -290,7 +290,9 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
 
   const renderMarkdown = useCallback(() => {
     if (!content) return null;
-    const sanitized = DOMPurify.sanitize(content);
+    const sanitized = DOMPurify.sanitize(content, {
+      ADD_ATTR: ['data-src'],
+    });
     return <div ref={markdownRef} className="readme-markdown-full" dangerouslySetInnerHTML={{ __html: sanitized }} />;
   }, [content]);
 
