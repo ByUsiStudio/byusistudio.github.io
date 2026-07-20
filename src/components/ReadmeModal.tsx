@@ -17,6 +17,50 @@ interface ReadmeModalProps {
   onClose: () => void;
 }
 
+interface ImageCacheEntry {
+  blobUrl: string;
+  width: number;
+  height: number;
+}
+
+const imageBlobCache = new Map<string, ImageCacheEntry>();
+
+async function fetchAndCacheImage(url: string): Promise<ImageCacheEntry> {
+  const cached = imageBlobCache.get(url);
+  if (cached) return cached;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    
+    const img = new Image();
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = blobUrl;
+    });
+
+    const entry: ImageCacheEntry = {
+      blobUrl,
+      width: img.width,
+      height: img.height,
+    };
+    imageBlobCache.set(url, entry);
+    return entry;
+  } catch {
+    const entry: ImageCacheEntry = {
+      blobUrl: url,
+      width: 0,
+      height: 0,
+    };
+    imageBlobCache.set(url, entry);
+    return entry;
+  }
+}
+
 export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose }: ReadmeModalProps) {
   const [dataLoading, setDataLoading] = useState(true);
   const [imagesLoading, setImagesLoading] = useState(true);
@@ -24,8 +68,15 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
   const [error, setError] = useState<string | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);
+  const [imageDimensions, setImageDimensions] = useState<Map<string, { width: number; height: number }>>(new Map());
   const markdownRef = useRef<HTMLDivElement>(null);
   const codeBlocksRef = useRef<{ code: string; lang: string }[]>([]);
+
+  useEffect(() => {
+    return () => {
+      setIsClosing(true);
+    };
+  }, []);
 
   const handleCopy = useCallback(async (code: string, index: number) => {
     try {
@@ -88,8 +139,11 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
     imgs.forEach((img) => {
       const src = img.getAttribute('src');
       if (src) {
-        img.setAttribute('src', convertPath(src));
+        const convertedSrc = convertPath(src);
+        img.setAttribute('data-src', convertedSrc);
+        img.removeAttribute('src');
         img.classList.add('readme-image');
+        img.classList.add('image-loading');
       }
     });
     
@@ -110,6 +164,7 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
     setImagesLoading(true);
     setError(null);
     codeBlocksRef.current = [];
+    setImageDimensions(new Map());
 
     onFetch(repoFullName)
       .then((readmeData) => {
@@ -136,47 +191,63 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
   }, [repoFullName, onFetch, convertRelativePaths]);
 
   useEffect(() => {
-    if (!markdownRef.current) return;
+    if (!content) return;
 
-    const images = markdownRef.current.querySelectorAll('img.readme-image');
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, 'text/html');
+    const imgs = doc.querySelectorAll('img[data-src]');
     
-    if (images.length === 0) {
+    if (imgs.length === 0) {
       setImagesLoading(false);
       return;
     }
 
-    let loadedCount = 0;
-    const totalImages = images.length;
+    const imageUrls = Array.from(imgs).map(img => img.getAttribute('data-src')!).filter(Boolean);
+    const dimensionsMap = new Map<string, { width: number; height: number }>();
 
-    const checkAllLoaded = () => {
-      loadedCount++;
-      if (loadedCount >= totalImages) {
-        setImagesLoading(false);
-      }
-    };
+    Promise.all(imageUrls.map(async (url) => {
+      const entry = await fetchAndCacheImage(url);
+      dimensionsMap.set(url, { width: entry.width, height: entry.height });
+      return entry;
+    })).then(() => {
+      setImageDimensions(dimensionsMap);
+      setImagesLoading(false);
+    }).catch(() => {
+      setImagesLoading(false);
+    });
+  }, [content]);
 
+  useEffect(() => {
+    if (!markdownRef.current || imagesLoading) return;
+
+    const images = markdownRef.current.querySelectorAll('img.readme-image');
+    
     images.forEach((img) => {
       const imgEl = img as HTMLImageElement;
-      imgEl.classList.add('image-loading');
+      const dataSrc = imgEl.getAttribute('data-src');
       
-      if (imgEl.complete) {
-        imgEl.classList.remove('image-loading');
-        imgEl.classList.add(imgEl.naturalWidth === 0 ? 'image-error' : 'image-loaded');
-        checkAllLoaded();
-      } else {
+      if (dataSrc) {
+        const cached = imageBlobCache.get(dataSrc);
+        if (cached) {
+          imgEl.src = cached.blobUrl;
+          
+          if (cached.width > 0 && cached.height > 0) {
+            imgEl.style.setProperty('--aspect-ratio', `${cached.width} / ${cached.height}`);
+          }
+        }
+        
         imgEl.onload = () => {
           imgEl.classList.remove('image-loading');
           imgEl.classList.add('image-loaded');
-          checkAllLoaded();
         };
+        
         imgEl.onerror = () => {
           imgEl.classList.remove('image-loading');
           imgEl.classList.add('image-error');
-          checkAllLoaded();
         };
       }
     });
-  }, [content]);
+  }, [imagesLoading, imageDimensions]);
 
   useEffect(() => {
     if (!markdownRef.current) return;
@@ -206,7 +277,7 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
         parentPre.appendChild(copyBtn);
       }
     });
-  }, [content, handleCopy]);
+  }, [content, imagesLoading, handleCopy]);
 
   useEffect(() => {
     if (!markdownRef.current) return;
