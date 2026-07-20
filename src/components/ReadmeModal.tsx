@@ -165,61 +165,77 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
     });
 
     const fetchAndConvertImages = async () => {
-      const fetchPromises = imgElements.map(async (imgEl) => {
+      const giteePromises: Promise<{ imgEl: HTMLImageElement; originalSrc: string; blobUrl: string | null; success: boolean; fromCache: boolean }>[] = [];
+      const nonGiteeImages: HTMLImageElement[] = [];
+
+      imgElements.forEach((imgEl) => {
         const originalSrc = imgEl.getAttribute('data-src');
         if (!originalSrc) {
-          return { imgEl, originalSrc: '', blobUrl: null, success: false, fromCache: false };
-        }
-        
-        const cachedUrl = blobCacheRef.current.get(originalSrc);
-        if (cachedUrl) {
-          console.log(`[Blob Cache Hit] ${originalSrc}`);
-          return { imgEl, originalSrc, blobUrl: cachedUrl, success: true, fromCache: true };
+          imgEl.classList.remove('image-loading');
+          imgEl.classList.add('image-error');
+          return;
         }
 
-        try {
-          const response = await fetch(originalSrc, {
-            mode: 'cors',
-            headers: {
-              'Accept': 'image/*',
-            },
-          });
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
+        if (originalSrc.includes('gitee.com')) {
+          giteePromises.push((async () => {
+            const cachedUrl = blobCacheRef.current.get(originalSrc);
+            if (cachedUrl) {
+              return { imgEl, originalSrc, blobUrl: cachedUrl, success: true, fromCache: true };
+            }
 
-          const blob = await response.blob();
-          const blobUrl = URL.createObjectURL(blob);
-          blobCacheRef.current.set(originalSrc, blobUrl);
-          
-          console.log(`[Blob Created] ${originalSrc} -> ${blobUrl}`);
-          return { imgEl, originalSrc, blobUrl, success: true, fromCache: false };
-        } catch (err) {
-          console.error(`[Blob Fetch Failed] ${originalSrc}:`, err);
-          return { imgEl, originalSrc, blobUrl: null, success: false, fromCache: false };
+            try {
+              const response = await fetch(originalSrc, {
+                mode: 'cors',
+                headers: {
+                  'Accept': 'image/*',
+                },
+              });
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+
+              const blob = await response.blob();
+              const blobUrl = URL.createObjectURL(blob);
+              blobCacheRef.current.set(originalSrc, blobUrl);
+              
+              return { imgEl, originalSrc, blobUrl, success: true, fromCache: false };
+            } catch (err) {
+              console.error(`[Blob Fetch Failed] ${originalSrc}:`, err);
+              return { imgEl, originalSrc, blobUrl: null, success: false, fromCache: false };
+            }
+          })());
+        } else {
+          nonGiteeImages.push(imgEl);
         }
       });
 
-      const results = await Promise.all(fetchPromises);
+      nonGiteeImages.forEach((imgEl) => {
+        const originalSrc = imgEl.getAttribute('data-src');
+        if (originalSrc) {
+          imgEl.src = originalSrc;
+          imgEl.classList.remove('image-loading');
+          imgEl.classList.add('image-loaded');
+        } else {
+          imgEl.classList.remove('image-loading');
+          imgEl.classList.add('image-error');
+        }
+      });
 
-      let replacedCount = 0;
+      const results = await Promise.all(giteePromises);
+
       results.forEach((result) => {
-        const { imgEl, originalSrc, blobUrl, success, fromCache } = result;
+        const { imgEl, originalSrc, blobUrl, success } = result;
         
         if (success && blobUrl) {
           imgEl.src = blobUrl;
-          replacedCount++;
-          console.log(`[Src Replaced] ${originalSrc} -> ${blobUrl} (fromCache: ${fromCache})`);
           
           imgEl.onload = () => {
             imgEl.classList.remove('image-loading');
             imgEl.classList.add('image-loaded');
-            console.log(`[Image Loaded] ${blobUrl}`);
           };
           imgEl.onerror = () => {
             imgEl.classList.remove('image-loading');
             imgEl.classList.add('image-error');
-            console.error(`[Image Load Failed] ${blobUrl}`);
             const cached = blobCacheRef.current.get(originalSrc);
             if (cached) {
               URL.revokeObjectURL(cached);
@@ -231,8 +247,6 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
           imgEl.classList.add('image-error');
         }
       });
-
-      console.log(`[Blob Replacement Complete] Total: ${imgElements.length}, Replaced: ${replacedCount}`);
     };
 
     fetchAndConvertImages();
