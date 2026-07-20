@@ -72,12 +72,6 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
   const markdownRef = useRef<HTMLDivElement>(null);
   const codeBlocksRef = useRef<{ code: string; lang: string }[]>([]);
 
-  useEffect(() => {
-    return () => {
-      setIsClosing(true);
-    };
-  }, []);
-
   const handleCopy = useCallback(async (code: string, index: number) => {
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
