@@ -36,8 +36,8 @@ export async function fetchRepos(): Promise<Repo[]> {
   const cached = getCache(CACHE_LIFETIME);
   if (cached) return cached;
 
-  const { baseUrl } = config.api;
-  const url = `${baseUrl}/repos`;
+  const { baseUrl, orgName, accessToken } = config.api;
+  const url = `${baseUrl}/orgs/${orgName}/repos?type=all&page=1&per_page=100&access_token=${accessToken}`;
 
   try {
     const response = await fetch(url, {
@@ -131,8 +131,8 @@ export async function fetchReadme(repoFullName: string): Promise<ReadmeData> {
   const cached = getReadmeCache(repoFullName, CACHE_LIFETIME);
   if (cached) return cached;
 
-  const { baseUrl } = config.api;
-  const url = `${baseUrl}/repos/${repoFullName}/readme`;
+  const { baseUrl, accessToken } = config.api;
+  const url = `${baseUrl}/repos/${repoFullName}/readme?access_token=${accessToken}`;
 
   try {
     const response = await fetch(url, {
