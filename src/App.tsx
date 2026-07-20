@@ -33,12 +33,15 @@ function AppContent() {
       .then((data) => {
         if (!cancelled) {
           setRepos(data);
-          setDataLoading(false);
         }
       })
       .catch((err) => {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : '未知错误');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
           setDataLoading(false);
         }
       });
