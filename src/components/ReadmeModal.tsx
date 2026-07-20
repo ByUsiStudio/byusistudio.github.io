@@ -58,42 +58,40 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
   const convertRelativePaths = useCallback((markdown: string, fullName: string): string => {
     const giteeRawBase = `https://gitee.com/${fullName}/raw/master`;
     
-    let converted = markdown;
+    const html = marked(markdown) as string;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
     
-    converted = converted.replace(
-      /!\[([^\]]*)\]\(([^)]+)\)/g,
-      (match, alt, src) => {
-        if (src.startsWith('http://') || src.startsWith('https://')) {
-          return match;
-        }
-        let cleanSrc = src.replace(/^['"]|['"]$/g, '');
-        cleanSrc = cleanSrc.replace(/^\.\//, '');
-        const fullPath = cleanSrc.startsWith('/') 
-          ? `${giteeRawBase}${cleanSrc}` 
-          : `${giteeRawBase}/${cleanSrc}`;
-        return `![${alt}](${fullPath})`;
+    const convertPath = (path: string): string => {
+      if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
       }
-    );
-    
-    converted = converted.replace(
-      /\[([^\]]+)\]\(([^)]+)\)/g,
-      (match, text, href) => {
-        if (href.startsWith('http://') || href.startsWith('https://')) {
-          return match;
-        }
-        if (href.startsWith('#')) {
-          return match;
-        }
-        let cleanHref = href.replace(/^['"]|['"]$/g, '');
-        cleanHref = cleanHref.replace(/^\.\//, '');
-        const fullPath = cleanHref.startsWith('/')
-          ? `${giteeRawBase}${cleanHref}`
-          : `${giteeRawBase}/${cleanHref}`;
-        return `[${text}](${fullPath})`;
+      if (path.startsWith('#')) {
+        return path;
       }
-    );
+      let cleanPath = path.replace(/^\.\//, '');
+      return cleanPath.startsWith('/') 
+        ? `${giteeRawBase}${cleanPath}` 
+        : `${giteeRawBase}/${cleanPath}`;
+    };
     
-    return converted;
+    const imgs = doc.querySelectorAll('img');
+    imgs.forEach((img) => {
+      const src = img.getAttribute('src');
+      if (src) {
+        img.setAttribute('src', convertPath(src));
+      }
+    });
+    
+    const links = doc.querySelectorAll('a');
+    links.forEach((link) => {
+      const href = link.getAttribute('href');
+      if (href) {
+        link.setAttribute('href', convertPath(href));
+      }
+    });
+    
+    return doc.body.innerHTML;
   }, []);
 
   useEffect(() => {
@@ -173,8 +171,7 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
 
   const renderMarkdown = useCallback(() => {
     if (!content) return null;
-    const html = marked(content) as string;
-    const sanitized = DOMPurify.sanitize(html);
+    const sanitized = DOMPurify.sanitize(content);
     return <div ref={markdownRef} className="readme-markdown-full" dangerouslySetInnerHTML={{ __html: sanitized }} />;
   }, [content]);
 
