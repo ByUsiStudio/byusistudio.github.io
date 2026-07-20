@@ -87,17 +87,18 @@ export async function fetchRepos(): Promise<Repo[]> {
 
 interface ReadmeCacheData {
   content: string;
+  repoFullName: string;
   timestamp: number;
 }
 
-function getReadmeCache(repoFullName: string, cacheLifetime: number): string | null {
+function getReadmeCache(repoFullName: string, cacheLifetime: number): { content: string; repoFullName: string } | null {
   try {
     const key = `${README_CACHE_KEY_PREFIX}${repoFullName}`;
     const raw = localStorage.getItem(key);
     if (!raw) return null;
     const cache: ReadmeCacheData = JSON.parse(raw);
     if (Date.now() - cache.timestamp > cacheLifetime) return null;
-    return cache.content;
+    return { content: cache.content, repoFullName: cache.repoFullName };
   } catch {
     return null;
   }
@@ -106,7 +107,7 @@ function getReadmeCache(repoFullName: string, cacheLifetime: number): string | n
 function setReadmeCache(repoFullName: string, content: string) {
   try {
     const key = `${README_CACHE_KEY_PREFIX}${repoFullName}`;
-    localStorage.setItem(key, JSON.stringify({ content, timestamp: Date.now() }));
+    localStorage.setItem(key, JSON.stringify({ content, repoFullName, timestamp: Date.now() }));
   } catch {
     // storage might be full
   }
@@ -115,9 +116,15 @@ function setReadmeCache(repoFullName: string, content: string) {
 interface ReadmeResponse {
   content: string;
   encoding: string;
+  repoFullName?: string;
 }
 
-export async function fetchReadme(repoFullName: string): Promise<string> {
+export interface ReadmeData {
+  content: string;
+  repoFullName: string;
+}
+
+export async function fetchReadme(repoFullName: string): Promise<ReadmeData> {
   const config = await loadApiConfig();
   const CACHE_LIFETIME = config.api.cacheLifetime * 1000;
 
@@ -155,8 +162,13 @@ export async function fetchReadme(repoFullName: string): Promise<string> {
       }
     }
 
+    const result: ReadmeData = {
+      content,
+      repoFullName: data.repoFullName || repoFullName,
+    };
+
     setReadmeCache(repoFullName, content);
-    return content;
+    return result;
   } catch (error) {
     console.error(`Failed to fetch README for ${repoFullName}:`, error);
     const cached = getReadmeCache(repoFullName, CACHE_LIFETIME * 24);

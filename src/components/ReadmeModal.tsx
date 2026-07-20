@@ -4,11 +4,16 @@ import DOMPurify from 'dompurify';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.css';
 
+interface ReadmeData {
+  content: string;
+  repoFullName: string;
+}
+
 interface ReadmeModalProps {
   repoName: string;
   repoFullName: string;
   repoUrl: string;
-  onFetch: (repoFullName: string) => Promise<string>;
+  onFetch: (repoFullName: string) => Promise<ReadmeData>;
   onClose: () => void;
 }
 
@@ -50,6 +55,45 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
 
+  const convertRelativePaths = useCallback((markdown: string, fullName: string): string => {
+    const giteeRawBase = `https://gitee.com/${fullName}/raw/master`;
+    
+    let converted = markdown;
+    
+    converted = converted.replace(
+      /!\[([^\]]*)\]\(([^)]+)\)/g,
+      (match, alt, src) => {
+        if (src.startsWith('http://') || src.startsWith('https://')) {
+          return match;
+        }
+        const cleanSrc = src.replace(/^['"]|['"]$/g, '');
+        const fullPath = cleanSrc.startsWith('/') 
+          ? `${giteeRawBase}${cleanSrc}` 
+          : `${giteeRawBase}/${cleanSrc}`;
+        return `![${alt}](${fullPath})`;
+      }
+    );
+    
+    converted = converted.replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      (match, text, href) => {
+        if (href.startsWith('http://') || href.startsWith('https://')) {
+          return match;
+        }
+        if (href.startsWith('#')) {
+          return match;
+        }
+        const cleanHref = href.replace(/^['"]|['"]$/g, '');
+        const fullPath = cleanHref.startsWith('/')
+          ? `${giteeRawBase}${cleanHref}`
+          : `${giteeRawBase}/${cleanHref}`;
+        return `[${text}](${fullPath})`;
+      }
+    );
+    
+    return converted;
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -57,9 +101,10 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
     codeBlocksRef.current = [];
 
     onFetch(repoFullName)
-      .then((readmeContent) => {
+      .then((readmeData) => {
         if (!cancelled) {
-          setContent(readmeContent);
+          const convertedContent = convertRelativePaths(readmeData.content, readmeData.repoFullName);
+          setContent(convertedContent);
         }
       })
       .catch((err) => {
@@ -76,7 +121,7 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
     return () => {
       cancelled = true;
     };
-  }, [repoFullName, onFetch]);
+  }, [repoFullName, onFetch, convertRelativePaths]);
 
   useEffect(() => {
     if (!markdownRef.current) return;
