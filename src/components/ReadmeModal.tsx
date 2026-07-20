@@ -155,8 +155,6 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
   useEffect(() => {
     if (!markdownRef.current) return;
 
-    revokeBlobUrls();
-
     const images = markdownRef.current.querySelectorAll('img.readme-image');
     const imgElements = Array.from(images) as HTMLImageElement[];
 
@@ -170,11 +168,17 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
         
         const cachedUrl = blobCacheRef.current.get(originalSrc);
         if (cachedUrl) {
-          return { imgEl, originalSrc, blobUrl: cachedUrl, success: true };
+          console.log(`[Blob Cache Hit] ${originalSrc}`);
+          return { imgEl, originalSrc, blobUrl: cachedUrl, success: true, fromCache: true };
         }
 
         try {
-          const response = await fetch(originalSrc);
+          const response = await fetch(originalSrc, {
+            mode: 'cors',
+            headers: {
+              'Accept': 'image/*',
+            },
+          });
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
@@ -183,26 +187,34 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
           const blobUrl = URL.createObjectURL(blob);
           blobCacheRef.current.set(originalSrc, blobUrl);
           
-          return { imgEl, originalSrc, blobUrl, success: true };
+          console.log(`[Blob Created] ${originalSrc} -> ${blobUrl}`);
+          return { imgEl, originalSrc, blobUrl, success: true, fromCache: false };
         } catch (err) {
-          return { imgEl, originalSrc, blobUrl: null, success: false };
+          console.error(`[Blob Fetch Failed] ${originalSrc}:`, err);
+          return { imgEl, originalSrc, blobUrl: null, success: false, fromCache: false };
         }
       });
 
       const results = await Promise.all(fetchPromises);
 
+      let replacedCount = 0;
       results.forEach((result) => {
-        const { imgEl, originalSrc, blobUrl, success } = result;
+        const { imgEl, originalSrc, blobUrl, success, fromCache } = result;
         
         if (success && blobUrl) {
           imgEl.src = blobUrl;
+          replacedCount++;
+          console.log(`[Src Replaced] ${originalSrc} -> ${blobUrl} (fromCache: ${fromCache})`);
+          
           imgEl.onload = () => {
             imgEl.classList.remove('image-loading');
             imgEl.classList.add('image-loaded');
+            console.log(`[Image Loaded] ${blobUrl}`);
           };
           imgEl.onerror = () => {
             imgEl.classList.remove('image-loading');
             imgEl.classList.add('image-error');
+            console.error(`[Image Load Failed] ${blobUrl}`);
             const cached = blobCacheRef.current.get(originalSrc);
             if (cached) {
               URL.revokeObjectURL(cached);
@@ -214,6 +226,8 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
           imgEl.classList.add('image-error');
         }
       });
+
+      console.log(`[Blob Replacement Complete] Total: ${imgElements.length}, Replaced: ${replacedCount}`);
     };
 
     fetchAndConvertImages();
