@@ -21,7 +21,6 @@ import './App.less';
 function AppContent() {
   const [repos, setRepos] = useState<Repo[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
-  const [resourcesLoaded, setResourcesLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { config, loading: configLoading } = useUiConfig();
 
@@ -49,25 +48,7 @@ function AppContent() {
     };
   }, []);
 
-  useEffect(() => {
-    const waitForResources = async () => {
-      const fontPromise = document.fonts?.ready || Promise.resolve();
-      const loadPromise = new Promise<void>((resolve) => {
-        if (document.readyState === 'complete') {
-          resolve();
-        } else {
-          window.addEventListener('load', () => resolve(), { once: true });
-        }
-      });
-
-      await Promise.all([fontPromise, loadPromise]);
-      setResourcesLoaded(true);
-    };
-
-    waitForResources();
-  }, []);
-
-  const isLoading = configLoading || dataLoading || !resourcesLoaded;
+  const isLoading = configLoading || dataLoading;
 
   if (!config) {
     return <div>配置加载失败</div>;
