@@ -60,7 +60,7 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
     setIsClosing(true);
     setTimeout(() => {
       onClose();
-    }, 300);
+    }, 500);
   }, [onClose]);
 
   const convertRelativePaths = useCallback((markdown: string, fullName: string): string => {
