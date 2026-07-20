@@ -66,7 +66,8 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
         if (src.startsWith('http://') || src.startsWith('https://')) {
           return match;
         }
-        const cleanSrc = src.replace(/^['"]|['"]$/g, '');
+        let cleanSrc = src.replace(/^['"]|['"]$/g, '');
+        cleanSrc = cleanSrc.replace(/^\.\//, '');
         const fullPath = cleanSrc.startsWith('/') 
           ? `${giteeRawBase}${cleanSrc}` 
           : `${giteeRawBase}/${cleanSrc}`;
@@ -83,7 +84,8 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
         if (href.startsWith('#')) {
           return match;
         }
-        const cleanHref = href.replace(/^['"]|['"]$/g, '');
+        let cleanHref = href.replace(/^['"]|['"]$/g, '');
+        cleanHref = cleanHref.replace(/^\.\//, '');
         const fullPath = cleanHref.startsWith('/')
           ? `${giteeRawBase}${cleanHref}`
           : `${giteeRawBase}/${cleanHref}`;
