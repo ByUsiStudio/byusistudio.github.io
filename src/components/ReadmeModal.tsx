@@ -25,6 +25,14 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
   const [isClosing, setIsClosing] = useState(false);
   const markdownRef = useRef<HTMLDivElement>(null);
   const codeBlocksRef = useRef<{ code: string; lang: string }[]>([]);
+  const blobCacheRef = useRef<Map<string, string>>(new Map());
+
+  const revokeBlobUrls = useCallback(() => {
+    blobCacheRef.current.forEach((blobUrl) => {
+      URL.revokeObjectURL(blobUrl);
+    });
+    blobCacheRef.current.clear();
+  }, []);
 
   const handleCopy = useCallback(async (code: string, index: number) => {
     try {
@@ -59,9 +67,10 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
   const handleClose = useCallback(() => {
     setIsClosing(true);
     setTimeout(() => {
+      revokeBlobUrls();
       onClose();
     }, 500);
-  }, [onClose]);
+  }, [onClose, revokeBlobUrls]);
 
   const convertRelativePaths = useCallback((markdown: string, fullName: string): string => {
     const giteeRawBase = `https://gitee.com/${fullName}/raw/master`;
@@ -78,9 +87,20 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
         return path;
       }
       let cleanPath = path.replace(/^\.\//, '');
-      return cleanPath.startsWith('/') 
-        ? `${giteeRawBase}${cleanPath}` 
-        : `${giteeRawBase}/${cleanPath}`;
+      if (cleanPath.startsWith('/')) {
+        return `${giteeRawBase}${cleanPath}`;
+      }
+      if (cleanPath.startsWith('../')) {
+        const segments = giteeRawBase.split('/').filter(Boolean);
+        while (cleanPath.startsWith('../')) {
+          cleanPath = cleanPath.substring(3);
+          if (segments.length > 4) {
+            segments.pop();
+          }
+        }
+        return `${segments.join('/')}/${cleanPath}`;
+      }
+      return `${giteeRawBase}/${cleanPath}`;
     };
     
     const imgs = doc.querySelectorAll('img');
@@ -135,24 +155,63 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
   useEffect(() => {
     if (!markdownRef.current) return;
 
+    revokeBlobUrls();
+
     const images = markdownRef.current.querySelectorAll('img.readme-image');
+    const loadingPromises: Promise<void>[] = [];
+
     images.forEach((img) => {
       const imgEl = img as HTMLImageElement;
-      if (!imgEl.complete) {
-        imgEl.classList.add('image-loading');
-        imgEl.onload = () => {
-          imgEl.classList.remove('image-loading');
-          imgEl.classList.add('image-loaded');
-        };
-        imgEl.onerror = () => {
+      const originalSrc = imgEl.src;
+
+      imgEl.classList.add('image-loading');
+
+      const loadImage = async () => {
+        try {
+          const cachedUrl = blobCacheRef.current.get(originalSrc);
+          if (cachedUrl) {
+            imgEl.src = cachedUrl;
+            imgEl.classList.remove('image-loading');
+            imgEl.classList.add('image-loaded');
+            return;
+          }
+
+          const response = await fetch(originalSrc);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const blob = await response.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          blobCacheRef.current.set(originalSrc, blobUrl);
+          imgEl.src = blobUrl;
+
+          imgEl.onload = () => {
+            imgEl.classList.remove('image-loading');
+            imgEl.classList.add('image-loaded');
+          };
+          imgEl.onerror = () => {
+            imgEl.classList.remove('image-loading');
+            imgEl.classList.add('image-error');
+            const cached = blobCacheRef.current.get(originalSrc);
+            if (cached) {
+              URL.revokeObjectURL(cached);
+              blobCacheRef.current.delete(originalSrc);
+            }
+          };
+        } catch (err) {
           imgEl.classList.remove('image-loading');
           imgEl.classList.add('image-error');
-        };
-      } else {
-        imgEl.classList.add('image-loaded');
-      }
+        }
+      };
+
+      loadingPromises.push(loadImage());
     });
-  }, [content]);
+
+    return () => {
+      revokeBlobUrls();
+    };
+  }, [content, revokeBlobUrls]);
 
   useEffect(() => {
     if (!markdownRef.current) return;
