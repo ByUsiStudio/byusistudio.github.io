@@ -1,8 +1,6 @@
 {
   "api": {
-    "baseUrl": "https://gitee.com/api/v5",
-    "orgName": "byusi",
-    "accessToken": "065753dd34a50459cbb009248fa8bd0d",
+    "baseUrl": "/api",
     "cacheLifetime": 3600
   },
   "pagination": {

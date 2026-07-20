@@ -1,22 +1,6 @@
 import type { Repo } from '../types/ui';
 import { loadApiConfig } from './config';
 
-interface GiteeRepo {
-  id: number;
-  name: string;
-  full_name: string;
-  description: string | null;
-  html_url: string;
-  language: string | null;
-  stargazers_count: number;
-  forks_count: number;
-  updated_at: string;
-  created_at: string;
-  archived: boolean;
-  has_issues: boolean;
-  open_issues_count: number;
-}
-
 interface CacheData {
   data: Repo[];
   timestamp: number;
@@ -52,8 +36,8 @@ export async function fetchRepos(): Promise<Repo[]> {
   const cached = getCache(CACHE_LIFETIME);
   if (cached) return cached;
 
-  const { baseUrl, orgName, accessToken } = config.api;
-  const url = `${baseUrl}/orgs/${orgName}/repos?type=all&page=1&per_page=100&access_token=${accessToken}`;
+  const { baseUrl } = config.api;
+  const url = `${baseUrl}/repos`;
 
   try {
     const response = await fetch(url, {
@@ -67,9 +51,9 @@ export async function fetchRepos(): Promise<Repo[]> {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    const data: GiteeRepo[] = await response.json();
+    const data = await response.json();
 
-    const repos: Repo[] = data.map((repo) => ({
+    const repos: Repo[] = data.map((repo: any) => ({
       id: repo.id,
       name: repo.name,
       full_name: repo.full_name,
@@ -90,7 +74,7 @@ export async function fetchRepos(): Promise<Repo[]> {
     setCache(repos);
     return repos;
   } catch (error) {
-    console.error('Failed to fetch repos from Gitee:', error);
+    console.error('Failed to fetch repos:', error);
     try {
       const raw = localStorage.getItem(CACHE_KEY);
       if (raw) return (JSON.parse(raw) as CacheData).data;
@@ -128,7 +112,7 @@ function setReadmeCache(repoFullName: string, content: string) {
   }
 }
 
-interface GiteeReadmeResponse {
+interface ReadmeResponse {
   content: string;
   encoding: string;
 }
@@ -140,8 +124,8 @@ export async function fetchReadme(repoFullName: string): Promise<string> {
   const cached = getReadmeCache(repoFullName, CACHE_LIFETIME);
   if (cached) return cached;
 
-  const { baseUrl, accessToken } = config.api;
-  const url = `${baseUrl}/repos/${repoFullName}/readme?access_token=${accessToken}`;
+  const { baseUrl } = config.api;
+  const url = `${baseUrl}/repos/${repoFullName}/readme`;
 
   try {
     const response = await fetch(url, {
@@ -155,7 +139,7 @@ export async function fetchReadme(repoFullName: string): Promise<string> {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    const data: GiteeReadmeResponse = await response.json();
+    const data: ReadmeResponse = await response.json();
 
     let content = data.content;
     if (data.encoding === 'base64') {
