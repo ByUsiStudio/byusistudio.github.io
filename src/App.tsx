@@ -48,10 +48,11 @@ function AppContent() {
     };
   }, []);
 
-  if (configLoading) {
+  if (configLoading || loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <div className="app-loading-overlay">
         <div className="loading-spinner"></div>
+        <p>加载中...</p>
       </div>
     );
   }

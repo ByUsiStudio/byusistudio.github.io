@@ -22,6 +22,7 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
   const [content, setContent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
   const markdownRef = useRef<HTMLDivElement>(null);
   const codeBlocksRef = useRef<{ code: string; lang: string }[]>([]);
 
@@ -49,10 +50,17 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') handleClose();
     };
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+    }, 300);
   }, [onClose]);
 
   const convertRelativePaths = useCallback((markdown: string, fullName: string): string => {
@@ -80,6 +88,7 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
       const src = img.getAttribute('src');
       if (src) {
         img.setAttribute('src', convertPath(src));
+        img.classList.add('readme-image');
       }
     });
     
@@ -122,6 +131,28 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
       cancelled = true;
     };
   }, [repoFullName, onFetch, convertRelativePaths]);
+
+  useEffect(() => {
+    if (!markdownRef.current) return;
+
+    const images = markdownRef.current.querySelectorAll('img.readme-image');
+    images.forEach((img) => {
+      const imgEl = img as HTMLImageElement;
+      if (!imgEl.complete) {
+        imgEl.classList.add('image-loading');
+        imgEl.onload = () => {
+          imgEl.classList.remove('image-loading');
+          imgEl.classList.add('image-loaded');
+        };
+        imgEl.onerror = () => {
+          imgEl.classList.remove('image-loading');
+          imgEl.classList.add('image-error');
+        };
+      } else {
+        imgEl.classList.add('image-loaded');
+      }
+    });
+  }, [content]);
 
   useEffect(() => {
     if (!markdownRef.current) return;
@@ -176,14 +207,17 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
   }, [content]);
 
   return (
-    <div className="readme-modal-overlay" onClick={onClose}>
-      <div className="readme-modal" onClick={(e) => e.stopPropagation()}>
+    <div 
+      className={`readme-modal-overlay ${isClosing ? 'closing' : ''}`} 
+      onClick={handleClose}
+    >
+      <div className={`readme-modal ${isClosing ? 'closing' : ''}`} onClick={(e) => e.stopPropagation()}>
         <div className="readme-modal-header">
           <div className="readme-modal-title">
             <i className="fas fa-file-alt"></i>
             <span>{repoName} - README</span>
           </div>
-          <button className="readme-modal-close" onClick={onClose}>
+          <button className="readme-modal-close" onClick={handleClose}>
             <i className="fas fa-times"></i>
           </button>
         </div>
@@ -213,7 +247,7 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
           <a href={repoUrl} className="readme-modal-link" target="_blank" rel="noopener noreferrer">
             <i className="fas fa-external-link-alt"></i> 在仓库查看
           </a>
-          <button className="readme-modal-close-btn" onClick={onClose}>
+          <button className="readme-modal-close-btn" onClick={handleClose}>
             <i className="fas fa-times"></i> 关闭
           </button>
         </div>
