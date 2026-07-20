@@ -22,10 +22,16 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [animateKey, setAnimateKey] = useState(0);
   const [selectedRepo, setSelectedRepo] = useState<Repo | null>(null);
+  const [modalOpenTime, setModalOpenTime] = useState<number>(0);
 
   useEffect(() => {
     setAnimateKey((prev) => prev + 1);
   }, [filter, searchTerm]);
+
+  const handleOpenModal = useCallback((repo: Repo) => {
+    setModalOpenTime(Date.now());
+    setSelectedRepo(repo);
+  }, []);
 
   if (!config) return null;
 
@@ -249,7 +255,7 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
                       <a href={repo.html_url} className="project-link" target="_blank" rel="noopener noreferrer">
                         <i className="fas fa-external-link-alt"></i>访问
                       </a>
-                      <button className="project-link readme" onClick={() => setSelectedRepo(repo)}>
+                      <button className="project-link readme" onClick={() => handleOpenModal(repo)}>
                         <i className="fas fa-file-alt"></i>README
                       </button>
                       {repo.has_issues && (
@@ -296,6 +302,7 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
 
   {selectedRepo && (
         <ReadmeModal
+          key={modalOpenTime}
           repoName={selectedRepo.name}
           repoFullName={selectedRepo.full_name}
           repoUrl={selectedRepo.html_url}
