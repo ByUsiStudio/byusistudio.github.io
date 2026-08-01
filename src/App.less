@@ -3139,7 +3139,7 @@ a {
 }
 
 .hitokoto-text-wrap {
-  animation: hitokotoTextIn 0.6s @ease-out-expo 0.3s backwards;
+  animation: hitokotoTextIn 0.8s @ease-out-expo 0.3s backwards;
 }
 
 .hitokoto-text {
@@ -3317,13 +3317,18 @@ a {
 }
 
 @keyframes hitokotoTextIn {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(45px);
+    filter: blur(4px);
   }
-  to {
+  60% {
+    filter: blur(0);
+  }
+  100% {
     opacity: 1;
     transform: translateY(0);
+    filter: blur(0);
   }
 }
 
