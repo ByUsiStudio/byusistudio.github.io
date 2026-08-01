@@ -42,7 +42,6 @@
       "sticky": true,
       "links": [
         { "href": "#home", "icon": "fas fa-home", "label": "首页" },
-        { "href": "#projects", "icon": "fas fa-code", "label": "项目" },
         { "href": "https://gitee.com/byusiteam", "icon": "fas fa-book", "label": "文档", "external": true},
         { "href": "https://moebun.com/aff/EBBZFNWQ", "icon": "fas fa-cloud", "label": "小兔互联", "external": true },
         { "href": "https://server.cdifit.cn", "icon": "fas fa-bolt", "label": "ByUsi Studio服务器监控", "external": true }
@@ -117,7 +116,7 @@
         {
           "title": "YavGame项目",
           "links": [
-            { "label": "To Be Riftinued", "href": "https://www.yavgame.com", "external": true },
+            { "label": "To Be Riftinued", "href": "https://tbr.yavgame.com", "external": true },
             { "label": "NotiLenti", "href": "https://notilenti.yavgame.com", "external": true }
           ]
         },
@@ -132,7 +131,13 @@
         {
           "title": "特别提醒",
           "links": [
-            { "label": "本站由 小兔互联 提供计算访问", "href": "https://moebun.com/aff/EBBZFNWQ", "external": true }
+            { "label": "本站由 小兔互联 提供计算服务", "href": "https://moebun.com/aff/EBBZFNWQ", "external": true }
+          ]
+        },
+        {
+          "title": "资助我们",
+          "links": [
+            { "label": "点击本链接获取赞助码", "href": "/wx_zzm.png", "external": true }
           ]
         }
       ]

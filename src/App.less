@@ -72,14 +72,23 @@ body {
     border-top-color: #3498db;
     border-right-color: #ffd54f;
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    box-shadow: 0 0 24px rgba(52, 152, 219, 0.25);
+    animation: spin 0.9s linear infinite, loadingGlow 2.2s ease-in-out infinite;
   }
 
   p {
     font-size: 16px;
     color: var(--text-color);
     opacity: 0.7;
+    animation: fadeIn 0.5s @ease-out-cubic 0.2s backwards;
+  }
+}
+
+@keyframes loadingGlow {
+  0%, 100% {
+    box-shadow: 0 0 18px rgba(52, 152, 219, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(52, 152, 219, 0.42);
   }
 }
 
@@ -3015,8 +3024,8 @@ a {
   align-items: flex-start;
   gap: 20px;
   overflow: hidden;
-  animation: scaleInUp 0.6s @ease-out-back;
-  transition: transform 0.4s @ease-out-back, box-shadow 0.4s @ease-out-cubic;
+  animation: hitokotoCardIn 0.7s @ease-out-expo;
+  transition: transform 0.45s @ease-out-expo, box-shadow 0.45s @ease-out-cubic;
 
   &::before {
     content: '';
@@ -3031,24 +3040,15 @@ a {
       rgba(255, 213, 79, 0.8),
       rgba(var(--primary-rgb), 0.7)
     );
-    animation: hitokotoBarPulse 3s ease-in-out infinite;
+    animation: hitokotoBarPulse 3.5s ease-in-out infinite;
   }
 
   &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 24px 60px rgba(var(--primary-rgb), 0.18);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(var(--primary-rgb), 0.16);
 
     .hitokoto-card-ring {
-      opacity: 0.7;
-      transform: scale(1.02);
-    }
-
-    .hitokoto-scan-line {
-      animation-duration: 2s;
-    }
-
-    .hitokoto-quote-icon {
-      animation-play-state: paused;
+      opacity: 0.65;
     }
   }
 }
@@ -3060,28 +3060,27 @@ a {
   right: -2px;
   bottom: -2px;
   border-radius: 18px;
-  border: 2px solid rgba(var(--primary-rgb), 0.25);
-  opacity: 0.4;
-  transform: scale(1);
-  animation: hitokotoRingPulse 4s ease-in-out infinite;
+  border: 2px solid rgba(var(--primary-rgb), 0.22);
+  opacity: 0.35;
+  animation: hitokotoRingBreathe 4s ease-in-out infinite;
   pointer-events: none;
-  transition: opacity 0.4s @ease-out-cubic, transform 0.4s @ease-out-cubic;
+  transition: opacity 0.45s @ease-out-cubic;
 }
 
 .hitokoto-scan-line {
   position: absolute;
-  top: 0;
   left: 0;
   width: 100%;
   height: 2px;
+  top: 0;
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(var(--primary-rgb), 0.45),
-    rgba(255, 213, 79, 0.35),
+    rgba(var(--primary-rgb), 0.4),
+    rgba(255, 213, 79, 0.3),
     transparent
   );
-  animation: hitokotoScanMove 5s ease-in-out infinite;
+  animation: hitokotoScanMove 5.5s @ease-in-out-cubic infinite;
   pointer-events: none;
   z-index: 1;
 }
@@ -3097,7 +3096,8 @@ a {
   background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.12), rgba(255, 213, 79, 0.18));
   color: var(--primary);
   font-size: 18px;
-  animation: spring 0.8s @ease-out-back, hitokotoIconPulse 3s ease-in-out 0.8s infinite;
+  animation: hitokotoIconIn 0.6s @ease-out-expo 0.15s backwards,
+    hitokotoIconBreathe 3.5s ease-in-out 0.75s infinite;
 }
 
 .hitokoto-content {
@@ -3106,7 +3106,7 @@ a {
 }
 
 .hitokoto-text-wrap {
-  animation: hitokotoTextIn 0.5s @ease-out-quart;
+  animation: hitokotoTextIn 0.6s @ease-out-expo 0.3s backwards;
 }
 
 .hitokoto-text {
@@ -3129,10 +3129,9 @@ a {
   color: var(--dark-gray);
   font-style: italic;
   opacity: 0;
-  transform: translateX(-12px);
 
   &.visible {
-    animation: hitokotoSourceIn 0.6s @ease-out-quart forwards;
+    animation: hitokotoSourceIn 0.7s @ease-out-expo forwards;
   }
 }
 
@@ -3147,7 +3146,7 @@ a {
     height: 9px;
     border-radius: 50%;
     background: var(--primary);
-    animation: hitokotoDotBounce 1.2s ease-in-out infinite;
+    animation: hitokotoDotWave 1.4s ease-in-out infinite;
 
     &:nth-child(2) {
       animation-delay: 0.2s;
@@ -3179,15 +3178,15 @@ a {
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  transition: all 0.3s @ease-out-cubic;
-  animation: fadeInRight 0.5s @ease-out-quart backwards;
+  transition: all 0.35s @ease-out-cubic;
+  animation: hitokotoBtnIn 0.5s @ease-out-expo backwards;
 
   &:nth-child(1) {
-    animation-delay: 0.3s;
+    animation-delay: 0.4s;
   }
 
   &:nth-child(2) {
-    animation-delay: 0.45s;
+    animation-delay: 0.55s;
   }
 
   &:hover:not(:disabled) {
@@ -3213,47 +3212,78 @@ a {
   }
 }
 
+@keyframes hitokotoCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @keyframes hitokotoBarPulse {
   0%, 100% {
-    opacity: 0.7;
+    opacity: 0.65;
   }
   50% {
     opacity: 1;
   }
 }
 
-@keyframes hitokotoRingPulse {
+@keyframes hitokotoRingBreathe {
   0%, 100% {
-    opacity: 0.3;
-    transform: scale(1);
+    opacity: 0.25;
   }
   50% {
-    opacity: 0.6;
-    transform: scale(1.012);
+    opacity: 0.55;
   }
 }
 
 @keyframes hitokotoScanMove {
   0% {
-    transform: translateY(0);
+    top: 0;
     opacity: 0;
   }
-  8% {
+  12% {
     opacity: 1;
   }
-  92% {
+  88% {
     opacity: 1;
   }
   100% {
-    transform: translateY(180px);
+    top: 100%;
     opacity: 0;
+  }
+}
+
+@keyframes hitokotoIconIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes hitokotoIconBreathe {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 14px 1px rgba(var(--primary-rgb), 0.18);
   }
 }
 
 @keyframes hitokotoTextIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -3264,7 +3294,7 @@ a {
 @keyframes hitokotoSourceIn {
   from {
     opacity: 0;
-    transform: translateX(-12px);
+    transform: translateX(-14px);
   }
   to {
     opacity: 1;
@@ -3272,23 +3302,23 @@ a {
   }
 }
 
-@keyframes hitokotoIconPulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.3);
+@keyframes hitokotoBtnIn {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
   }
-  50% {
-    transform: scale(1.08);
-    box-shadow: 0 0 0 8px rgba(var(--primary-rgb), 0);
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
-@keyframes hitokotoDotBounce {
-  0%, 80%, 100% {
-    transform: scale(0.6);
-    opacity: 0.5;
+@keyframes hitokotoDotWave {
+  0%, 100% {
+    transform: scale(0.5);
+    opacity: 0.4;
   }
-  40% {
+  50% {
     transform: scale(1);
     opacity: 1;
   }
