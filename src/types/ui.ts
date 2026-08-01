@@ -100,7 +100,6 @@ export interface TeamConfig {
 
 export interface HitokotoConfig {
   show: boolean;
-  category?: string;
 }
 
 export interface FooterLink {
