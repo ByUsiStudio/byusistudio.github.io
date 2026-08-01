@@ -130,12 +130,8 @@ export interface HitokotoData {
   from_who?: string;
 }
 
-export async function fetchHitokoto(category?: string): Promise<HitokotoData> {
-  const url = category
-    ? `https://hi.logacg.com/?c=${encodeURIComponent(category)}`
-    : 'https://hi.logacg.com/';
-
-  const response = await fetch(url, {
+export async function fetchHitokoto(): Promise<HitokotoData> {
+  const response = await fetch('https://hi.logacg.com/', {
     headers: {
       Accept: 'application/json',
     },
