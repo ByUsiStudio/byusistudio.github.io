@@ -116,16 +116,17 @@ export function Hitokoto() {
       className="hitokoto-section"
       style={{
         '--primary': theme.primary,
+        '--accent': theme.accent,
         '--dark-gray': theme['dark-gray'],
-        '--card-bg': theme['card-bg'],
-        '--border-color': theme['border-color'],
         '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
       } as React.CSSProperties}
     >
       <div className="hitokoto-glow-bg"></div>
       <div className="layui-container">
         <div className="hitokoto-card">
+          <div className="hitokoto-card-glow"></div>
           <div className="hitokoto-card-ring"></div>
+          <div className="hitokoto-card-ring hitokoto-card-ring-delay"></div>
           <div className="hitokoto-scan-line"></div>
 
           <div className="hitokoto-quote-icon">
