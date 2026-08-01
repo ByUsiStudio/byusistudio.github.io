@@ -35,8 +35,9 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
 
   if (!config) return null;
 
-  const { projects: projectsConfig } = config.layout;
-  const itemsPerPage = projectsConfig.itemsPerPage;
+  const projectsConfig = config.layout?.projects;
+  if (!projectsConfig) return null;
+  const itemsPerPage = projectsConfig.itemsPerPage || 10;
 
   const filteredRepos = useMemo(() => {
     let result = [...repos];
@@ -186,7 +187,7 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
         </div>
 
         <div className="project-filters">
-          {projectsConfig.filters.map(({ key, label }) => (
+          {(projectsConfig.filters || []).map(({ key, label }) => (
             <button
               key={key}
               className={`filter-btn ${filter === key ? 'active' : ''}`}

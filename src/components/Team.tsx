@@ -10,7 +10,8 @@ export function Team() {
 
   if (!config) return null;
 
-  const { team } = config.layout;
+  const team = config.layout?.team;
+  if (!team) return null;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -49,7 +50,7 @@ export function Team() {
         <h2 className="section-title scroll-animate">{team.title}</h2>
         <div className="team-grid-bg"></div>
         <div ref={containerRef} className="team-grid scroll-animate">
-          {team.items.map((item, index) => (
+          {(team.items || []).map((item, index) => (
             <div
               key={index}
               className="team-card"

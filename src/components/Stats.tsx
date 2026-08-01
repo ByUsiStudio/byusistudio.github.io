@@ -49,7 +49,8 @@ export function Stats({ repos }: StatsProps) {
 
   if (!config) return null;
 
-  const { stats: statsConfig } = config.layout;
+  const statsConfig = config.layout?.stats;
+  if (!statsConfig) return null;
 
   const totalRepos = repos.length;
   const totalStars = repos.reduce((sum, repo) => sum + repo.stargazers_count, 0);
@@ -102,7 +103,7 @@ export function Stats({ repos }: StatsProps) {
       <div className="layui-container">
         <div className="stats-glow-bg"></div>
         <div ref={containerRef} className="stats-container scroll-animate">
-          {statsConfig.cards.map((card, index) => (
+          {(statsConfig.cards || []).map((card, index) => (
             <div
               key={card.key}
               className="stat-card"
