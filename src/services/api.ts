@@ -124,6 +124,35 @@ export interface ReadmeData {
   repoFullName: string;
 }
 
+export interface HitokotoData {
+  hitokoto: string;
+  from?: string;
+  from_who?: string;
+}
+
+export async function fetchHitokoto(category?: string): Promise<HitokotoData> {
+  const url = category
+    ? `https://hi.logacg.com/?c=${encodeURIComponent(category)}`
+    : 'https://hi.logacg.com/';
+
+  const response = await fetch(url, {
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return {
+    hitokoto: data.hitokoto,
+    from: data.from,
+    from_who: data.from_who,
+  };
+}
+
 export async function fetchReadme(repoFullName: string): Promise<ReadmeData> {
   const config = await loadApiConfig();
   const CACHE_LIFETIME = config.api.cacheLifetime * 1000;

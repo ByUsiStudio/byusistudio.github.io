@@ -91,6 +91,12 @@
         { "icon": "fas fa-share-alt", "title": "开放共享", "description": "坚持开放源代码原则，促进技术透明度和社区参与度。" }
       ]
     },
+    "hitokoto": {
+      "show": true,
+      "autoRefresh": true,
+      "interval": 30,
+      "category": "a"
+    },
     "footer": {
       "show": true,
       "copyright": "© 2026 ByUsi Studio",

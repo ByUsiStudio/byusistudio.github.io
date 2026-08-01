@@ -98,6 +98,13 @@ export interface TeamConfig {
   items: TeamItemConfig[];
 }
 
+export interface HitokotoConfig {
+  show: boolean;
+  autoRefresh: boolean;
+  interval: number;
+  category?: string;
+}
+
 export interface FooterLink {
   label: string;
   href: string;
@@ -122,6 +129,7 @@ export interface LayoutConfig {
   stats: StatsConfig;
   projects: ProjectsConfig;
   team: TeamConfig;
+  hitokoto: HitokotoConfig;
   footer: FooterConfig;
 }
 

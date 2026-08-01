@@ -7,6 +7,7 @@ import { Hero } from './components/Hero';
 import { Stats } from './components/Stats';
 import { Projects } from './components/Projects';
 import { Team } from './components/Team';
+import { Hitokoto } from './components/Hitokoto';
 
 import { Footer } from './components/Footer';
 import { ScrollProgress } from './components/ScrollProgress';
@@ -79,6 +80,7 @@ function AppContent() {
         {layout.stats.show && <Stats repos={repos} loading={dataLoading} error={error} />}
         {layout.projects.show && <Projects repos={repos} loading={dataLoading} error={error} />}
         {layout.team.show && <Team />}
+        {layout.hitokoto.show && <Hitokoto />}
         
         {layout.footer.show && <Footer repos={repos} />}
         <BackToTop />
