@@ -23,12 +23,12 @@ export function Hitokoto() {
 
   const hitokotoConfig = config?.layout.hitokoto;
 
-  const loadHitokoto = useCallback(async (category?: string) => {
+  const loadHitokoto = useCallback(async () => {
     setLoading(true);
     setError(false);
     setTypingComplete(false);
     try {
-      const result = await fetchHitokoto(category);
+      const result = await fetchHitokoto();
       setData(result);
       setDisplayKey((k) => k + 1);
     } catch {
@@ -40,7 +40,7 @@ export function Hitokoto() {
 
   useEffect(() => {
     if (!hitokotoConfig?.show) return;
-    loadHitokoto(hitokotoConfig.category);
+    loadHitokoto();
     // 仅在首次挂载时加载，刷新由用户主动触发
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hitokotoConfig?.show]);
@@ -55,7 +55,7 @@ export function Hitokoto() {
 
   const handleRefresh = () => {
     if (loading) return;
-    loadHitokoto(hitokotoConfig.category);
+    loadHitokoto();
   };
 
   const buildCopyText = () => {
