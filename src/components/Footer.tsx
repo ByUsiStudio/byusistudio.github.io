@@ -10,8 +10,9 @@ export function Footer({ repos }: FooterProps) {
 
   if (!config) return null;
 
-  const { footer } = config.layout;
-  const footerLinks = footer.columns;
+  const footer = config.layout?.footer;
+  if (!footer) return null;
+  const footerLinks = footer.columns || [];
 
   const handleLinkClick = (href: string, external?: boolean) => {
     if (!external && href.startsWith('#')) {
@@ -30,7 +31,7 @@ export function Footer({ repos }: FooterProps) {
             <div key={index} className="footer-column">
               <h4>{column.title}</h4>
               <ul>
-                {column.links.map((link, linkIndex) => (
+                {(column.links || []).map((link, linkIndex) => (
                   <li key={linkIndex}>
                     <a
                       href={link.href}
