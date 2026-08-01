@@ -17,6 +17,7 @@ export function Hitokoto() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [displayKey, setDisplayKey] = useState(0);
+  const [typingComplete, setTypingComplete] = useState(false);
   const [copied, setCopied] = useState(false);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -25,6 +26,7 @@ export function Hitokoto() {
   const loadHitokoto = useCallback(async (category?: string) => {
     setLoading(true);
     setError(false);
+    setTypingComplete(false);
     try {
       const result = await fetchHitokoto(category);
       setData(result);
@@ -99,7 +101,7 @@ export function Hitokoto() {
     if (!who && !from) return null;
 
     return (
-      <p className="hitokoto-source">
+      <p className={`hitokoto-source ${typingComplete ? 'visible' : ''}`}>
         —— {who}
         {who && from ? ' ' : ''}
         {from ? `《${from}》` : ''}
@@ -123,6 +125,9 @@ export function Hitokoto() {
       <div className="hitokoto-glow-bg"></div>
       <div className="layui-container">
         <div className="hitokoto-card">
+          <div className="hitokoto-card-ring"></div>
+          <div className="hitokoto-scan-line"></div>
+
           <div className="hitokoto-quote-icon">
             <i className="fas fa-quote-left"></i>
           </div>
@@ -137,17 +142,17 @@ export function Hitokoto() {
             ) : error && !data ? (
               <p className="hitokoto-text hitokoto-fallback">这一言，暂时走丢了…</p>
             ) : data ? (
-              <>
+              <div key={displayKey} className="hitokoto-text-wrap">
                 <p className="hitokoto-text">
                   <Typewriter
-                    key={displayKey}
                     text={data.hitokoto}
                     speed={120}
                     delay={200}
+                    onComplete={() => setTypingComplete(true)}
                   />
                 </p>
                 {renderSource()}
-              </>
+              </div>
             ) : null}
           </div>
 

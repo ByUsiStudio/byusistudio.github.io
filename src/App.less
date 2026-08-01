@@ -2997,6 +2997,7 @@ a {
   gap: 20px;
   overflow: hidden;
   animation: scaleInUp 0.6s @ease-out-back;
+  transition: transform 0.4s @ease-out-back, box-shadow 0.4s @ease-out-cubic;
 
   &::before {
     content: '';
@@ -3011,7 +3012,59 @@ a {
       rgba(255, 213, 79, 0.8),
       rgba(var(--primary-rgb), 0.7)
     );
+    animation: hitokotoBarPulse 3s ease-in-out infinite;
   }
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 24px 60px rgba(var(--primary-rgb), 0.18);
+
+    .hitokoto-card-ring {
+      opacity: 0.7;
+      transform: scale(1.02);
+    }
+
+    .hitokoto-scan-line {
+      animation-duration: 2s;
+    }
+
+    .hitokoto-quote-icon {
+      animation-play-state: paused;
+    }
+  }
+}
+
+.hitokoto-card-ring {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 18px;
+  border: 2px solid rgba(var(--primary-rgb), 0.25);
+  opacity: 0.4;
+  transform: scale(1);
+  animation: hitokotoRingPulse 4s ease-in-out infinite;
+  pointer-events: none;
+  transition: opacity 0.4s @ease-out-cubic, transform 0.4s @ease-out-cubic;
+}
+
+.hitokoto-scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(var(--primary-rgb), 0.45),
+    rgba(255, 213, 79, 0.35),
+    transparent
+  );
+  animation: hitokotoScanMove 5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .hitokoto-quote-icon {
@@ -3025,12 +3078,16 @@ a {
   background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.12), rgba(255, 213, 79, 0.18));
   color: var(--primary);
   font-size: 18px;
-  animation: hitokotoIconPulse 3s ease-in-out infinite;
+  animation: spring 0.8s @ease-out-back, hitokotoIconPulse 3s ease-in-out 0.8s infinite;
 }
 
 .hitokoto-content {
   flex: 1;
   min-width: 0;
+}
+
+.hitokoto-text-wrap {
+  animation: hitokotoTextIn 0.5s @ease-out-quart;
 }
 
 .hitokoto-text {
@@ -3052,6 +3109,12 @@ a {
   font-size: 14px;
   color: var(--dark-gray);
   font-style: italic;
+  opacity: 0;
+  transform: translateX(-12px);
+
+  &.visible {
+    animation: hitokotoSourceIn 0.6s @ease-out-quart forwards;
+  }
 }
 
 .hitokoto-loading {
@@ -3098,6 +3161,15 @@ a {
   justify-content: center;
   font-size: 14px;
   transition: all 0.3s @ease-out-cubic;
+  animation: fadeInRight 0.5s @ease-out-quart backwards;
+
+  &:nth-child(1) {
+    animation-delay: 0.3s;
+  }
+
+  &:nth-child(2) {
+    animation-delay: 0.45s;
+  }
 
   &:hover:not(:disabled) {
     background: var(--primary);
@@ -3119,6 +3191,65 @@ a {
   &:disabled {
     cursor: not-allowed;
     opacity: 0.6;
+  }
+}
+
+@keyframes hitokotoBarPulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes hitokotoRingPulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.012);
+  }
+}
+
+@keyframes hitokotoScanMove {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(180px);
+    opacity: 0;
+  }
+}
+
+@keyframes hitokotoTextIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hitokotoSourceIn {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
