@@ -8,7 +8,8 @@ export function Hero() {
 
   if (!config) return null;
 
-  const { hero } = config.layout;
+  const hero = config.layout?.hero;
+  if (!hero) return null;
 
   const scrollToProjects = () => {
     const element = document.querySelector('#projects');
@@ -59,7 +60,7 @@ export function Hero() {
           </h1>
           <p className="hero-subtitle animate-step-in delay-300">{hero.subtitle}</p>
           <div className="hero-buttons">
-            {hero.buttons.map((btn, idx) =>
+            {(hero.buttons || []).map((btn, idx) =>
               btn.action === 'scrollToProjects' ? (
                 <button
                   key={idx}
