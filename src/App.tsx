@@ -67,7 +67,14 @@ function AppContent() {
     );
   }
 
-  const { layout } = config;
+  const layout = config.layout || {};
+  const navbar = layout.navbar || { sticky: false };
+  const hero = layout.hero || { show: false };
+  const hitokoto = layout.hitokoto || { show: false };
+  const stats = layout.stats || { show: false };
+  const projects = layout.projects || { show: false };
+  const team = layout.team || { show: false };
+  const footer = layout.footer || { show: false };
 
   return (
     <ThemeProvider>
@@ -75,14 +82,14 @@ function AppContent() {
         <HeadConfig />
         <MouseFollower />
         <ScrollProgress />
-        {layout.navbar.sticky && <Header />}
-        {layout.hero.show && <Hero />}
-        {layout.hitokoto.show && <Hitokoto />}
-        {layout.stats.show && <Stats repos={repos} loading={dataLoading} error={error} />}
-        {layout.projects.show && <Projects repos={repos} loading={dataLoading} error={error} />}
-        {layout.team.show && <Team />}
+        {navbar.sticky && <Header />}
+        {hero.show && <Hero />}
+        {hitokoto.show && <Hitokoto />}
+        {stats.show && <Stats repos={repos} loading={dataLoading} error={error} />}
+        {projects.show && <Projects repos={repos} loading={dataLoading} error={error} />}
+        {team.show && <Team />}
         
-        {layout.footer.show && <Footer repos={repos} />}
+        {footer.show && <Footer repos={repos} />}
         <BackToTop />
         <CookieRecord />
       </div>
