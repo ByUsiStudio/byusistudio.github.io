@@ -77,10 +77,10 @@ function AppContent() {
         <ScrollProgress />
         {layout.navbar.sticky && <Header />}
         {layout.hero.show && <Hero />}
+        {layout.hitokoto.show && <Hitokoto />}
         {layout.stats.show && <Stats repos={repos} loading={dataLoading} error={error} />}
         {layout.projects.show && <Projects repos={repos} loading={dataLoading} error={error} />}
         {layout.team.show && <Team />}
-        {layout.hitokoto.show && <Hitokoto />}
         
         {layout.footer.show && <Footer repos={repos} />}
         <BackToTop />

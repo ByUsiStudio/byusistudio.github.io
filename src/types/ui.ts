@@ -100,8 +100,6 @@ export interface TeamConfig {
 
 export interface HitokotoConfig {
   show: boolean;
-  autoRefresh: boolean;
-  interval: number;
   category?: string;
 }
 

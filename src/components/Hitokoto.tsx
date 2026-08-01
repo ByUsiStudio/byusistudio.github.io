@@ -17,7 +17,8 @@ export function Hitokoto() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [displayKey, setDisplayKey] = useState(0);
-  const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const hitokotoConfig = config?.layout.hitokoto;
 
@@ -37,31 +38,58 @@ export function Hitokoto() {
 
   useEffect(() => {
     if (!hitokotoConfig?.show) return;
-
     loadHitokoto(hitokotoConfig.category);
+    // 仅在首次挂载时加载，刷新由用户主动触发
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hitokotoConfig?.show]);
 
-    if (hitokotoConfig.autoRefresh && hitokotoConfig.interval > 0) {
-      timerRef.current = setInterval(() => {
-        loadHitokoto(hitokotoConfig.category);
-      }, hitokotoConfig.interval * 1000);
-    }
-
+  useEffect(() => {
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
     };
-  }, [
-    hitokotoConfig?.show,
-    hitokotoConfig?.autoRefresh,
-    hitokotoConfig?.interval,
-    hitokotoConfig?.category,
-    loadHitokoto,
-  ]);
+  }, []);
 
   if (!config || !hitokotoConfig?.show) return null;
 
   const handleRefresh = () => {
     if (loading) return;
     loadHitokoto(hitokotoConfig.category);
+  };
+
+  const buildCopyText = () => {
+    if (!data) return '';
+    const who = data.from_who?.trim();
+    const from = data.from?.trim();
+    let source = '';
+    if (who) source += who;
+    if (who && from) source += ' ';
+    if (from) source += `《${from}》`;
+    return source ? `${data.hitokoto}\n—— ${source}` : data.hitokoto;
+  };
+
+  const handleCopy = async () => {
+    const text = buildCopyText();
+    if (!text) return;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        textarea.style.top = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setCopied(true);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('复制失败:', err);
+    }
   };
 
   const renderSource = () => {
@@ -78,6 +106,8 @@ export function Hitokoto() {
       </p>
     );
   };
+
+  const canCopy = !!data && !loading;
 
   return (
     <section
@@ -121,15 +151,26 @@ export function Hitokoto() {
             ) : null}
           </div>
 
-          <button
-            className={`hitokoto-refresh ${loading ? 'spinning' : ''}`}
-            onClick={handleRefresh}
-            disabled={loading}
-            aria-label="换一句"
-            title="换一句"
-          >
-            <i className="fas fa-sync-alt"></i>
-          </button>
+          <div className="hitokoto-actions">
+            <button
+              className={`hitokoto-action-btn ${copied ? 'copied' : ''}`}
+              onClick={handleCopy}
+              disabled={!canCopy}
+              aria-label="复制一言"
+              title="复制一言"
+            >
+              <i className={`fas ${copied ? 'fa-check' : 'fa-copy'}`}></i>
+            </button>
+            <button
+              className={`hitokoto-action-btn ${loading ? 'spinning' : ''}`}
+              onClick={handleRefresh}
+              disabled={loading}
+              aria-label="换一句"
+              title="换一句"
+            >
+              <i className="fas fa-sync-alt"></i>
+            </button>
+          </div>
         </div>
       </div>
     </section>
