@@ -19,8 +19,10 @@ export function Header() {
 
   if (!config) return null;
 
-  const { navbar } = config.layout;
-  const navLinks = navbar.links;
+  const navbar = config.layout?.navbar;
+  if (!navbar) return null;
+
+  const navLinks = navbar.links || [];
 
   const scrollToSection = (href: string) => {
     if (href.startsWith('#')) {
