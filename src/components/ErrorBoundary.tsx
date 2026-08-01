@@ -32,9 +32,18 @@ class ErrorBoundaryComponent extends Component<Props, State> {
       errorInfo,
     });
     console.error('Error Boundary caught an error:', error, errorInfo);
-    setTimeout(() => {
-      window.location.href = '/error.html?code=500';
-    }, 500);
+
+    try {
+      const errorDesc = encodeURIComponent(error.message || '未知错误');
+      const errorTitle = encodeURIComponent('应用错误');
+      setTimeout(() => {
+        window.location.href = `/error.html?code=500&title=${errorTitle}&desc=${errorDesc}`;
+      }, 1500);
+    } catch {
+      setTimeout(() => {
+        window.location.href = '/error.html?code=500';
+      }, 1500);
+    }
   }
 
   componentDidUpdate(prevProps: Props) {
