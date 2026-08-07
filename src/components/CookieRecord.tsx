@@ -7,7 +7,6 @@ export function CookieRecord() {
   const { record, ipStatus, refreshIp, clearRecord } = useCookieRecord();
   const [expanded, setExpanded] = useState(false);
 
-  // 计算陪伴天数
   const daysSinceFirst = useMemo(() => {
     if (!record) return 0;
     const first = new Date(record.firstVisit).getTime();
@@ -15,7 +14,6 @@ export function CookieRecord() {
     return Math.max(0, Math.floor((now - first) / (1000 * 60 * 60 * 24)));
   }, [record]);
 
-  // 格式化时间为本地可读形式
   const formatTime = (iso: string) => {
     try {
       const d = new Date(iso);
@@ -126,7 +124,24 @@ export function CookieRecord() {
         </div>
 
         <div className="cookie-actions">
-          <button className="cookie-clear-btn" onClick={clearRecord}>
+          <button
+            className="cookie-clear-btn"
+            onClick={async () => {
+              const confirmed = await JCuPupw.confirm({
+                title: '清除访问记录',
+                content: '确定要清除本地的访问记录吗？此操作不可恢复，将重置访问次数与陪伴天数。',
+                confirmText: '清除',
+                cancelText: '取消',
+              });
+              if (!confirmed) return;
+              clearRecord();
+              JCuPupw.toast({
+                content: '访问记录已清除',
+                type: 'success',
+                duration: 2500,
+              });
+            }}
+          >
             <i className="fas fa-eraser"></i> 清除记录
           </button>
         </div>
