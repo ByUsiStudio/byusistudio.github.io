@@ -48,6 +48,17 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
     return isLargeScreen;
   }, [layoutMode, isLargeScreen]);
 
+  const getTimeText = useCallback((updatedAt: string) => {
+    const updatedDate = new Date(updatedAt);
+    const timeDiff = Math.floor((new Date().getTime() - updatedDate.getTime()) / (1000 * 60 * 60 * 24));
+    if (timeDiff === 0) return '今天';
+    if (timeDiff === 1) return '昨天';
+    if (timeDiff < 7) return `${timeDiff}天前`;
+    if (timeDiff < 30) return `${Math.floor(timeDiff / 7)}周前`;
+    if (timeDiff < 365) return `${Math.floor(timeDiff / 30)}个月前`;
+    return `${Math.floor(timeDiff / 365)}年前`;
+  }, []);
+
   useEffect(() => {
     setAnimateKey((prev) => prev + 1);
   }, [filter, searchTerm]);
@@ -205,17 +216,6 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-  const getTimeText = useCallback((updatedAt: string) => {
-    const updatedDate = new Date(updatedAt);
-    const timeDiff = Math.floor((new Date().getTime() - updatedDate.getTime()) / (1000 * 60 * 60 * 24));
-    if (timeDiff === 0) return '今天';
-    if (timeDiff === 1) return '昨天';
-    if (timeDiff < 7) return `${timeDiff}天前`;
-    if (timeDiff < 30) return `${Math.floor(timeDiff / 7)}周前`;
-    if (timeDiff < 365) return `${Math.floor(timeDiff / 30)}个月前`;
-    return `${Math.floor(timeDiff / 365)}年前`;
-  }, []);
 
   if (loading) {
     return (
