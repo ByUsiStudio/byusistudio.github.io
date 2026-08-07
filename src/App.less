@@ -81,6 +81,34 @@ body {
     opacity: 0.7;
     animation: fadeIn 0.5s @ease-out-cubic 0.2s backwards;
   }
+
+  @media (max-width: 768px) {
+    gap: 24px;
+
+    .loading-spinner {
+      width: 80px;
+      height: 80px;
+      border-width: 6px;
+    }
+
+    p {
+      font-size: 20px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    gap: 28px;
+
+    .loading-spinner {
+      width: 96px;
+      height: 96px;
+      border-width: 7px;
+    }
+
+    p {
+      font-size: 22px;
+    }
+  }
 }
 
 @keyframes loadingGlow {
