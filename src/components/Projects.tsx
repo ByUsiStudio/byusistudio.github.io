@@ -363,7 +363,7 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
           </div>
         ) : (
           <>
-            <div ref={containerRef} className={`project-list ${isDoubleColumn ? 'double-column' : ''}`}>
+            <div ref={containerRef} className={`project-list ${isDoubleColumn ? 'double-column' : ''} ${layoutSwitching ? 'is-switching' : ''}`}>
               {paginatedRepos.map((repo, index) => (
                 <div
                   key={`${repo.id}-${animateKey}`}
@@ -407,6 +407,9 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
                       </div>
                     </div>
                     <div className="project-links">
+                      <button className="project-link preview" onClick={() => handlePreviewProject(repo)} title="项目预览">
+                        <i className="fas fa-eye"></i>预览
+                      </button>
                       <a href={repo.html_url} className="project-link" target="_blank" rel="noopener noreferrer">
                         <i className="fas fa-external-link-alt"></i>访问
                       </a>

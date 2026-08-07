@@ -77,6 +77,7 @@ interface JCuPupwInstance {
 
 interface JCuPupwStatic {
   new (options?: { id?: string }): JCuPupwInstance;
+  open(options?: JCuPupwOpenOptions): Promise<void>;
   alert(options?: JCuPupwAlertOptions): Promise<void>;
   confirm(options?: JCuPupwConfirmOptions): Promise<boolean>;
   prompt(options?: JCuPupwPromptOptions): Promise<string | null>;
