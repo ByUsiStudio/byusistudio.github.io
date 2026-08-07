@@ -157,7 +157,7 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
       });
     }
 
-    JCuPupw.open({
+    JCuPupw.instance().open({
       title: repo.name,
       content: previewHtml,
       size: 'lg',
