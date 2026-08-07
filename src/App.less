@@ -2055,6 +2055,42 @@ a {
           background: rgba(var(--accent-rgb), 0.18);
         }
       }
+
+      &.preview {
+        background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.18), rgba(var(--primary-rgb), 0.06));
+        color: var(--primary);
+        border: none;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+
+        &::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 50%);
+          pointer-events: none;
+        }
+
+        &:hover {
+          background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.3), rgba(var(--primary-rgb), 0.12));
+          transform: translateY(-3px);
+          box-shadow: 0 6px 18px rgba(var(--primary-rgb), 0.28);
+
+          i {
+            transform: scale(1.15);
+          }
+        }
+
+        &:active {
+          transform: translateY(-1px);
+          box-shadow: 0 3px 8px rgba(var(--primary-rgb), 0.2);
+        }
+
+        i {
+          transition: transform 0.3s @ease-out-back;
+        }
+      }
     }
   }
 }
