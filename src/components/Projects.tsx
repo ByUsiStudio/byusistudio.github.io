@@ -25,6 +25,7 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
   const [modalOpenTime, setModalOpenTime] = useState<number>(0);
   const [layoutMode, setLayoutMode] = useState<ProjectLayoutMode>('auto');
   const [isLargeScreen, setIsLargeScreen] = useState(false);
+  const [layoutSwitching, setLayoutSwitching] = useState(false);
 
   useEffect(() => {
     if (config?.layout?.projects?.layout) {
@@ -57,9 +58,107 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
   }, []);
 
   const handleLayoutChange = useCallback((mode: ProjectLayoutMode) => {
-    setLayoutMode(mode);
-    setCurrentPage(1);
-  }, []);
+    if (mode === layoutMode || layoutSwitching) return;
+    setLayoutSwitching(true);
+    window.setTimeout(() => {
+      setLayoutMode(mode);
+      setCurrentPage(1);
+      setAnimateKey((prev) => prev + 1);
+      window.requestAnimationFrame(() => {
+        window.setTimeout(() => setLayoutSwitching(false), 30);
+      });
+    }, 260);
+  }, [layoutMode, layoutSwitching]);
+
+  const handlePreviewProject = useCallback((repo: Repo) => {
+    if (typeof JCuPupw === 'undefined') return;
+
+    const starCount = repo.stargazers_count.toLocaleString();
+    const forkCount = repo.forks_count.toLocaleString();
+    const issueCount = repo.open_issues_count.toLocaleString();
+    const updatedText = getTimeText(repo.updated_at);
+
+    const previewHtml = `
+      <div class="jc-preview">
+        <div class="jc-preview-badges">
+          ${repo.archived ? '<span class="jc-badge jc-badge--muted">已归档</span>' : ''}
+          ${repo.language ? `<span class="jc-badge">${repo.language}</span>` : ''}
+        </div>
+        <p class="jc-preview-desc">
+          ${repo.description || '该项目暂无描述信息'}
+        </p>
+        <div class="jc-preview-stats">
+          <div class="jc-stat">
+            <i class="fas fa-star"></i>
+            <span class="jc-stat-label">Star</span>
+            <span class="jc-stat-value">${starCount}</span>
+          </div>
+          <div class="jc-stat">
+            <i class="fas fa-code-branch"></i>
+            <span class="jc-stat-label">Fork</span>
+            <span class="jc-stat-value">${forkCount}</span>
+          </div>
+          <div class="jc-stat">
+            <i class="fas fa-exclamation-circle"></i>
+            <span class="jc-stat-label">Issues</span>
+            <span class="jc-stat-value">${issueCount}</span>
+          </div>
+          <div class="jc-stat">
+            <i class="fas fa-clock"></i>
+            <span class="jc-stat-label">更新</span>
+            <span class="jc-stat-value">${updatedText}</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const buttons: Array<{
+      text: string;
+      type: 'default' | 'primary' | 'danger';
+      action: () => void;
+      close: boolean;
+    }> = [
+      {
+        text: '查看 README',
+        type: 'primary',
+        close: true,
+        action: () => handleOpenModal(repo),
+      },
+      {
+        text: '访问仓库',
+        type: 'default',
+        close: true,
+        action: () => {
+          window.open(repo.html_url, '_blank', 'noopener,noreferrer');
+          JCuPupw.toast({ content: `已打开 ${repo.name}`, type: 'info', duration: 1800 });
+        },
+      },
+    ];
+
+    if (repo.has_issues) {
+      buttons.push({
+        text: '提交问题',
+        type: 'default',
+        close: true,
+        action: () => {
+          window.open(`${repo.html_url}/issues`, '_blank', 'noopener,noreferrer');
+        },
+      });
+    }
+
+    JCuPupw.open({
+      title: repo.name,
+      content: previewHtml,
+      size: 'lg',
+      theme: 'auto',
+      closeOnOverlay: true,
+      closeOnEsc: true,
+      buttons,
+      onOpen: () => {
+        JCuPupw.toast({ content: `预览 ${repo.name}`, type: 'info', duration: 1500 });
+      },
+    });
+  }, [getTimeText, handleOpenModal]);
 
   if (!config) return null;
 
