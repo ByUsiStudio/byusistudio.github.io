@@ -78,12 +78,16 @@ export interface FilterConfig {
   label: string;
 }
 
+export type ProjectLayoutMode = 'single' | 'double' | 'auto';
+
 export interface ProjectsConfig {
   show: boolean;
   title: string;
   searchPlaceholder: string;
   filters: FilterConfig[];
   itemsPerPage: number;
+  layout?: ProjectLayoutMode;
+  doubleColumnBreakpoint?: number;
 }
 
 export interface TeamItemConfig {

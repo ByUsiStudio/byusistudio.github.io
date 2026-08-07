@@ -79,7 +79,9 @@
         { "key": "stars", "label": "星标最多" },
         { "key": "archived", "label": "归档项目" }
       ],
-      "itemsPerPage": 10
+      "itemsPerPage": 10,
+      "layout": "auto",
+      "doubleColumnBreakpoint": 1200
     },
     "team": {
       "show": true,

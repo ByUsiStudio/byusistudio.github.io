@@ -3,7 +3,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useUiConfig } from '../context/UiConfigContext';
 import { ReadmeModal } from './ReadmeModal';
 import { fetchReadme } from '../services/api';
-import type { Repo } from '../types/ui';
+import type { Repo, ProjectLayoutMode } from '../types/ui';
 
 type FilterType = 'all' | 'recent' | 'popular' | 'forked' | 'stars' | 'archived';
 
@@ -23,6 +23,29 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
   const [animateKey, setAnimateKey] = useState(0);
   const [selectedRepo, setSelectedRepo] = useState<Repo | null>(null);
   const [modalOpenTime, setModalOpenTime] = useState<number>(0);
+  const [layoutMode, setLayoutMode] = useState<ProjectLayoutMode>('auto');
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
+
+  useEffect(() => {
+    if (config?.layout?.projects?.layout) {
+      setLayoutMode(config.layout.projects.layout);
+    }
+
+    const checkScreenSize = () => {
+      const breakpoint = config?.layout?.projects?.doubleColumnBreakpoint || 1200;
+      setIsLargeScreen(window.innerWidth >= breakpoint);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, [config]);
+
+  const isDoubleColumn = useMemo(() => {
+    if (layoutMode === 'double') return true;
+    if (layoutMode === 'single') return false;
+    return isLargeScreen;
+  }, [layoutMode, isLargeScreen]);
 
   useEffect(() => {
     setAnimateKey((prev) => prev + 1);
@@ -31,6 +54,11 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
   const handleOpenModal = useCallback((repo: Repo) => {
     setModalOpenTime(Date.now());
     setSelectedRepo(repo);
+  }, []);
+
+  const handleLayoutChange = useCallback((mode: ProjectLayoutMode) => {
+    setLayoutMode(mode);
+    setCurrentPage(1);
   }, []);
 
   if (!config) return null;
@@ -102,8 +130,8 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
       >
         <div className="layui-container">
           <h2 className="section-title scroll-animate">{projectsConfig.title}</h2>
-          <div className="project-list scroll-animate">
-            {[...Array(6)].map((_, idx) => (
+          <div className={`project-list scroll-animate ${isDoubleColumn ? 'double-column' : ''}`}>
+            {[...Array(isDoubleColumn ? 6 : 6)].map((_, idx) => (
               <div key={idx} className="project-item skeleton">
                 <div className="project-item-header">
                   <div className="project-icon skeleton-icon"></div>
@@ -186,19 +214,46 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
           <i className="fas fa-search search-icon"></i>
         </div>
 
-        <div className="project-filters">
-          {(projectsConfig.filters || []).map(({ key, label }) => (
+        <div className="project-toolbar">
+          <div className="project-filters">
+            {(projectsConfig.filters || []).map(({ key, label }) => (
+              <button
+                key={key}
+                className={`filter-btn ${filter === key ? 'active' : ''}`}
+                onClick={() => {
+                  setFilter(key as FilterType);
+                  setCurrentPage(1);
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="layout-switcher">
+            <span className="layout-switcher-label">布局:</span>
             <button
-              key={key}
-              className={`filter-btn ${filter === key ? 'active' : ''}`}
-              onClick={() => {
-                setFilter(key as FilterType);
-                setCurrentPage(1);
-              }}
+              className={`layout-btn ${layoutMode === 'single' ? 'active' : ''}`}
+              onClick={() => handleLayoutChange('single')}
+              title="单列布局"
             >
-              {label}
+              <i className="fas fa-list"></i>
             </button>
-          ))}
+            <button
+              className={`layout-btn ${layoutMode === 'auto' ? 'active' : ''}`}
+              onClick={() => handleLayoutChange('auto')}
+              title="自动布局"
+            >
+              <i className="fas fa-desktop"></i>
+            </button>
+            <button
+              className={`layout-btn ${layoutMode === 'double' ? 'active' : ''}`}
+              onClick={() => handleLayoutChange('double')}
+              title="双列布局"
+            >
+              <i className="fas fa-th-large"></i>
+            </button>
+          </div>
         </div>
 
         {filteredRepos.length === 0 ? (
@@ -209,12 +264,12 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
           </div>
         ) : (
           <>
-            <div ref={containerRef} className="project-list">
+            <div ref={containerRef} className={`project-list ${isDoubleColumn ? 'double-column' : ''}`}>
               {paginatedRepos.map((repo, index) => (
                 <div
                   key={`${repo.id}-${animateKey}`}
                   className="project-item"
-                  style={{ animationDelay: `${index * 100}ms` }}
+                  style={{ animationDelay: `${index * 80}ms` }}
                 >
                   <div className="project-glow-border"></div>
                   <div className="project-item-inner">
