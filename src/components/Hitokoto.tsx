@@ -41,8 +41,6 @@ export function Hitokoto() {
   useEffect(() => {
     if (!hitokotoConfig?.show) return;
     loadHitokoto();
-    // 仅在首次挂载时加载，刷新由用户主动触发
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hitokotoConfig?.show]);
 
   useEffect(() => {

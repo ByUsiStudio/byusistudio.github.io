@@ -131,7 +131,7 @@ export interface HitokotoData {
 }
 
 export async function fetchHitokoto(): Promise<HitokotoData> {
-  const response = await fetch('https://hi.logacg.com/', {
+  const response = await fetch('https://api.www.cdifit.cn/yy/?encode=json', {
     headers: {
       Accept: 'application/json',
     },
