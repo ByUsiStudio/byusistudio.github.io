@@ -5,7 +5,6 @@ let uiConfigCache: UiConfig | null = null;
 export interface ApiConfig {
   baseUrl: string;
   orgName: string;
-  accessToken: string;
   cacheLifetime: number;
 }
 

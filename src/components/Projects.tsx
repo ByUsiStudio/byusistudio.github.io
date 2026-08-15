@@ -2,7 +2,9 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useUiConfig } from '../context/UiConfigContext';
 import { ReadmeModal } from './ReadmeModal';
+import { RecentRepos } from './RecentRepos';
 import { fetchReadme } from '../services/api';
+import { useRecentRepos } from '../hooks/useRecentRepos';
 import type { Repo, ProjectLayoutMode } from '../types/ui';
 
 type FilterType = 'all' | 'recent' | 'popular' | 'forked' | 'stars' | 'archived';
@@ -16,6 +18,7 @@ interface ProjectsProps {
 export function Projects({ repos, loading, error }: ProjectsProps) {
   const { theme } = useTheme();
   const { config } = useUiConfig();
+  const { recentIds, recordRecent, removeRecent, clearRecent } = useRecentRepos();
   const containerRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState<FilterType>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,9 +67,10 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
   }, [filter, searchTerm]);
 
   const handleOpenModal = useCallback((repo: Repo) => {
+    recordRecent(repo.full_name);
     setModalOpenTime(Date.now());
     setSelectedRepo(repo);
-  }, []);
+  }, [recordRecent]);
 
   const handleLayoutChange = useCallback((mode: ProjectLayoutMode) => {
     if (mode === layoutMode || layoutSwitching) return;
@@ -83,6 +87,7 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
 
   const handlePreviewProject = useCallback((repo: Repo) => {
     if (typeof JCuPupw === 'undefined') return;
+    recordRecent(repo.full_name);
 
     const starCount = repo.stargazers_count.toLocaleString();
     const forkCount = repo.forks_count.toLocaleString();
@@ -169,7 +174,7 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
         JCuPupw.toast({ content: `预览 ${repo.name}`, type: 'info', duration: 1500 });
       },
     });
-  }, [getTimeText, handleOpenModal]);
+  }, [getTimeText, handleOpenModal, recordRecent]);
 
   if (!config) return null;
 
@@ -298,6 +303,14 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
         } as React.CSSProperties}
       >
       <div className="layui-container">
+        <RecentRepos
+          recentIds={recentIds}
+          repos={repos}
+          onOpen={handleOpenModal}
+          onRemove={removeRecent}
+          onClear={clearRecent}
+        />
+
         <h2 className="section-title">{projectsConfig.title}</h2>
 
         <div className="project-search">

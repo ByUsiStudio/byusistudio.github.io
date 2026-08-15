@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <!-- <style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ByUsi Studio - 开源创新力量</title>
+    <style>
         .no-js-warning {
             position: fixed;
-            top: 0;
-            left: 0;
+            inset: 0;
             width: 100%;
             height: 100%;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -14,62 +16,88 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 20px;
+            padding: 24px;
+            box-sizing: border-box;
             z-index: 99999;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
         }
         .no-js-warning .icon {
             font-size: 64px;
-            color: #e74c3c;
-            margin-bottom: 24px;
-            animation: pulse 2s infinite;
+            line-height: 1;
+            margin-bottom: 20px;
         }
         .no-js-warning h1 {
             color: #ffffff;
             font-size: 24px;
-            margin-bottom: 16px;
+            margin: 0 0 12px;
             font-weight: 600;
+        }
+        .no-js-warning .highlight {
+            color: #3498db;
         }
         .no-js-warning p {
             color: #bdc3c7;
-            font-size: 16px;
-            line-height: 1.6;
-            max-width: 400px;
+            font-size: 15px;
+            line-height: 1.7;
+            max-width: 440px;
+            margin: 0 0 24px;
+        }
+        .no-js-warning .browser-title {
+            color: #8e9aaf;
+            font-size: 13px;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
         }
         .no-js-warning .browser-list {
-            margin-top: 24px;
             display: flex;
-            gap: 16px;
+            gap: 12px;
             flex-wrap: wrap;
             justify-content: center;
+            margin-bottom: 24px;
         }
         .no-js-warning .browser-item {
             padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 8px;
             color: #ecf0f1;
             font-size: 14px;
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .no-js-warning .btn {
+            display: inline-block;
+            padding: 11px 26px;
+            background: #3498db;
+            color: #ffffff;
+            border-radius: 6px;
+            font-size: 14px;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
         }
-    </style> -->
+        .no-js-warning .btn:hover {
+            background: #2980b9;
+        }
+        .no-js-warning .btn:focus-visible {
+            outline: 3px solid rgba(52, 152, 219, 0.6);
+            outline-offset: 3px;
+        }
+    </style>
 </head>
 <body>
-    <!-- <noscript>
+    <noscript>
         <div class="no-js-warning">
-            <div class="icon">⚠️</div>
-            <h1>请启用 JavaScript</h1>
-            <p>本网站需要 JavaScript 才能正常运行。请在浏览器设置中启用 JavaScript，然后刷新页面。</p>
+            <div class="icon" role="img" aria-label="警告">⚠️</div>
+            <h1>请启用 <span class="highlight">JavaScript</span></h1>
+            <p>本网站需要 JavaScript 才能正常运行。请在浏览器设置中启用 JavaScript，然后刷新页面即可继续访问。</p>
+            <div class="browser-title">支持以下主流浏览器</div>
             <div class="browser-list">
                 <div class="browser-item">Chrome</div>
                 <div class="browser-item">Firefox</div>
                 <div class="browser-item">Safari</div>
                 <div class="browser-item">Edge</div>
             </div>
+            <a class="btn" href="https://www.enablejavascript.com/" target="_blank" rel="noopener noreferrer">查看如何启用 JavaScript</a>
         </div>
-    </noscript> -->
-    <noscript>JavaScript is disabled. Please enable JavaScript to continue this website. <a href="https://www.enablejavascript.com/">Enable JavaScript</a></noscript>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script src="/js/jcupupw.umd.js"></script>

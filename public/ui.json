@@ -42,7 +42,7 @@
       "sticky": true,
       "links": [
         { "href": "#home", "icon": "fas fa-home", "label": "首页" },
-        { "href": "https://gitee.com/byusiteam", "icon": "fas fa-book", "label": "文档", "external": true},
+        { "href": "https://gitee.com/byusistudio/docs", "icon": "fas fa-book", "label": "文档", "external": true},
         { "href": "https://moebun.com/aff/EBBZFNWQ", "icon": "fas fa-cloud", "label": "小兔互联", "external": true },
         { "href": "https://server.cdifit.cn", "icon": "fas fa-bolt", "label": "ByUsi Studio服务器监控", "external": true }
       ]
@@ -53,7 +53,7 @@
       "subtitle": "共建共享 · 创新协作 · 开源未来",
       "buttons": [
         { "label": "查看项目", "icon": "fas fa-rocket", "action": "scrollToProjects", "primary": true },
-        { "label": "访问仓库", "icon": "fab fa-git-alt", "href": "https://gitee.com/byusi", "primary": false },
+        { "label": "访问仓库", "icon": "fab fa-git-alt", "href": "https://gitee.com/byusistudio", "primary": false },
         { "label": "小兔互联", "icon": "fas fa-cloud", "href": "https://moebun.com/aff/EBBZFNWQ", "external": true, "primary": true },
         { "label": "ByUsi Studio服务器监控", "icon": "fas fa-bolt", "href": "https://server.cdifit.cn", "external": true, "primary": false }
       ]

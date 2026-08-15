@@ -1,8 +1,7 @@
 {
   "api": {
     "baseUrl": "https://gitee.com/api/v5",
-    "orgName": "byusi",
-    "accessToken": "065753dd34a50459cbb009248fa8bd0d",
+    "orgName": "byusistudio",
     "cacheLifetime": 3600
   },
   "pagination": {
@@ -13,8 +12,8 @@
     "description": "共建共享 · 创新协作 · 开源未来",
     "logo": "/logo/byusi.png",
     "links": {
-      "gitee": "https://gitee.com/byusi",
-      "docs": "https://gitee.com/byusiteam"
+      "gitee": "https://gitee.com/byusistudio",
+      "docs": "https://gitee.com/byusistudio/docs"
     }
   }
 }

@@ -10,7 +10,8 @@
 - 📊 **实时统计** - 展示Gitee仓库统计数据（项目数、星标数、分支数、活跃项目）
 - 🔍 **项目搜索** - 支持按名称和描述搜索项目
 - 🎯 **项目筛选** - 支持按最近更新、热门、分支、星标、归档等条件筛选
-- � **README 预览** - 点击项目卡片查看 README，支持 Markdown 渲染、代码高亮、Gitee 图片 Blob 缓存加载
+- 🕘 **最近访问** - 记录最近查看过的仓库，按访问时间展示在项目区顶部，方便快速回访
+- 📄 **README 预览** - 点击项目卡片查看 README，支持 Markdown 渲染、代码高亮、Gitee 图片 Blob 缓存加载
 - 💬 **一言展示** - 集成一言 API，打字机效果逐字显示，支持复制和手动刷新
 - 🖱️ **鼠标跟随** - 自定义鼠标跟随光标效果
 - 📜 **滚动进度** - 顶部滚动进度条指示阅读位置
@@ -71,6 +72,7 @@ src/
 │   ├── MouseFollower.tsx  # 鼠标跟随光标
 │   ├── Projects.tsx       # 项目列表组件
 │   ├── ReadmeModal.tsx    # README 预览弹窗
+│   ├── RecentRepos.tsx    # 最近访问仓库条
 │   ├── ScrollProgress.tsx # 滚动进度条
 │   ├── Stats.tsx          # 统计数据组件
 │   ├── Team.tsx           # 团队/功能展示组件
@@ -83,7 +85,8 @@ src/
 ├── hooks/                 # 自定义 Hooks
 │   ├── useCookieRecord.ts # Cookie 记录 Hook
 │   ├── useLocalStorage.ts # 本地存储 Hook
-│   └── useScrollAnimation.ts # 滚动动画 Hook
+│   ├── useScrollAnimation.ts # 滚动动画 Hook
+│   └── useRecentRepos.ts   # 最近访问仓库 Hook
 ├── services/              # 服务层
 │   ├── api.ts             # API 请求（仓库/README/一言）
 │   └── config.ts          # 配置加载
@@ -94,7 +97,7 @@ src/
 └── main.tsx               # 入口文件
 
 public/                    # 静态资源（运行时配置）
-├── config.json            # API 配置（baseUrl/orgName/accessToken）
+├── config.json            # API 配置（baseUrl/orgName）
 ├── ui.json                # UI 配置（布局/主题/导航等）
 ├── error.html             # 错误页面
 └── Font/                  # FontAwesome 图标库
@@ -123,8 +126,11 @@ Gitee API 访问配置：
 
 - `baseUrl` - Gitee API 基础地址
 - `orgName` - 组织/用户名
-- `accessToken` - 访问令牌
 - `cacheLifetime` - 缓存有效期（秒）
+
+> ⚠️ **不要在此处配置任何 access token**。本站所有接口均访问 Gitee 公开仓库资源，
+> 无需鉴权；由于前端代码和 `public/` 静态文件对访问者可见，任何放在这里的
+> token 都会直接泄露。如需访问私有数据，请改走后端代理。
 
 ## 动画效果
 
