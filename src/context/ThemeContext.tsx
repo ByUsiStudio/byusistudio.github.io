@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, ReactNode } from 'react';
+import { createContext, useContext, useMemo, useEffect, ReactNode } from 'react';
 import type { Theme } from '../types/ui';
 import { useUiConfig } from './UiConfigContext';
 
@@ -19,9 +19,33 @@ const defaultLightTheme: Theme = {
   'dark-gray': '#666',
   'card-bg': '#ffffff',
   'border-color': '#eee',
-  'shadow': '0 2px 10px rgba(0, 0, 0, 0.08)',
-  'transition': 'all 0.3s ease',
+  shadow: '0 2px 10px rgba(0, 0, 0, 0.08)',
+  transition: 'all 0.3s ease',
 };
+
+type ThemeVarKey = keyof Theme;
+
+const THEME_VAR_ORDER: ThemeVarKey[] = [
+  'bg-color',
+  'text-color',
+  'primary',
+  'primary-dark',
+  'secondary',
+  'accent',
+  'light-gray',
+  'dark-gray',
+  'card-bg',
+  'border-color',
+  'shadow',
+  'transition',
+];
+
+function applyThemeToRoot(theme: Theme) {
+  const root = document.documentElement;
+  for (const key of THEME_VAR_ORDER) {
+    root.style.setProperty(`--${key}`, theme[key]);
+  }
+}
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const { config } = useUiConfig();
@@ -33,28 +57,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return defaultLightTheme;
   }, [config]);
 
+  useEffect(() => {
+    applyThemeToRoot(theme);
+  }, [theme]);
+
   return (
     <ThemeContext.Provider value={{ theme }}>
-      <div
-        style={
-          {
-            '--bg-color': theme['bg-color'],
-            '--text-color': theme['text-color'],
-            '--primary': theme.primary,
-            '--primary-dark': theme['primary-dark'],
-            '--secondary': theme.secondary,
-            '--accent': theme.accent,
-            '--light-gray': theme['light-gray'],
-            '--dark-gray': theme['dark-gray'],
-            '--card-bg': theme['card-bg'],
-            '--border-color': theme['border-color'],
-            '--shadow': theme.shadow,
-            '--transition': theme.transition,
-          } as React.CSSProperties
-        }
-      >
-        {children}
-      </div>
+      {children}
     </ThemeContext.Provider>
   );
 }

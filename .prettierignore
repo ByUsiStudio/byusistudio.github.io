@@ -1,0 +1,8 @@
+dist/
+deploy/
+node_modules/
+public/
+libs/
+*.css
+*.map
+package-lock.json

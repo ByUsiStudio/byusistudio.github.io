@@ -4,26 +4,40 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "lessc src/noJsWarning.less public/no-js-warning.css --source-map",
     "dev": "vite",
+    "prebuild": "lessc src/noJsWarning.less public/no-js-warning.css --source-map",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "postbuild": "node scripts/postbuild.mjs",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --ext ts,tsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,less,css,json}\" \"*.{json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,less,css,json}\" \"*.{json,md}\""
   },
   "dependencies": {
-    "@types/highlight.js": "^9.12.4",
-    "concurrently": "^8.2.2",
     "dompurify": "^3.4.12",
     "highlight.js": "^11.11.1",
     "marked": "^18.0.6",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/dompurify": "^3.0.5",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "@vitejs/plugin-react": "^4.2.0",
-    "less": "^4.6.7",
-    "typescript": "^5.3.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "@vitejs/plugin-react": "^4.3.3",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.14",
+    "less": "^4.7.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
     "vite": "^6.0.0"
   }
 }

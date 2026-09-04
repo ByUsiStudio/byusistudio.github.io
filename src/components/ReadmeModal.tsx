@@ -264,7 +264,7 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
       const parentPre = codeBlock.parentElement as HTMLPreElement;
       const langClass = codeBlock.className || '';
       const match = langClass.match(/language-(\w+)/);
-      const lang = match ? match[1] : 'plaintext';
+      const lang = match ? (match[1] ?? 'plaintext') : 'plaintext';
       const code = codeBlock.textContent || '';
 
       codeBlocksRef.current[index] = { code, lang };

@@ -1,4 +1,15 @@
 node_modules
 dist
+deploy
 *.bak
 server/.env
+
+# ESLint / Prettier cache
+.eslintcache
+.pttierignore
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

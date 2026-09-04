@@ -11,7 +11,7 @@ interface State {
 }
 
 class ErrorBoundaryComponent extends Component<Props, State> {
-  state: State = {
+  override state: State = {
     hasError: false,
     error: null,
     errorInfo: null,
@@ -25,7 +25,7 @@ class ErrorBoundaryComponent extends Component<Props, State> {
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({
       hasError: true,
       error,
@@ -46,7 +46,7 @@ class ErrorBoundaryComponent extends Component<Props, State> {
     }
   }
 
-  componentDidUpdate(prevProps: Props) {
+  override componentDidUpdate(prevProps: Props) {
     if (prevProps.children !== this.props.children) {
       this.setState({
         hasError: false,
@@ -56,7 +56,7 @@ class ErrorBoundaryComponent extends Component<Props, State> {
     }
   }
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return <ErrorFallback error={this.state.error} />;
     }
