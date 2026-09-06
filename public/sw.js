@@ -5,8 +5,6 @@
 const CACHE_NAME = 'byusi-cache-v1';
 const PRECACHE_URLS = [
   '/',
-  '/ui.json',
-  '/config.json',
   '/no-js-warning.css',
   '/manifest.webmanifest',
 ];
