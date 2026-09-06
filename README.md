@@ -140,6 +140,18 @@ Gitee API 访问配置：
 - `orgName` - 组织/用户名
 - `cacheLifetime` - 缓存有效期（秒）
 
+### GitHub 兼容（public/config.json）
+
+支持在 Gitee 之外展示 GitHub 组织项目，启用后主界面将在项目区后新增
+“GitHub 开源项目”分区（支持搜索与“加载更多”）：
+
+- `github.enabled` - 是否启用 GitHub 分区（默认 `false`）
+- `github.orgName` - GitHub 组织/用户名（启用后必填）
+- `github.baseUrl` - 可选，默认 `https://api.github.com`
+- `github.cacheLifetime` - 缓存有效期（秒），默认 3600
+
+> 注意：GitHub 匿名接口限流约 60 次/小时，本项目已用本地缓存缓解。
+
 > ⚠️ **不要在此处配置任何 access token**。本站所有接口均访问 Gitee 公开仓库资源，
 > 无需鉴权；由于前端代码和 `public/` 静态文件对访问者可见，任何放在这里的
 > token 都会直接泄露。如需访问私有数据，请改走后端代理。
