@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { UiConfigProvider } from './context/UiConfigContext';
 import { useUiConfig } from './context/uiConfig';
@@ -9,6 +9,29 @@ import { loadGithubConfig } from './services/config';
 import type { GithubConfig } from './services/config';
 import type { Repo } from './types/ui';
 import './App.less';
+
+/** 首次访问全屏加载标记（仅展示一次，之后访问直接进入页面） */
+const SPLASH_KEY = 'byusi_seen_splash';
+const SPLASH_SHOW_MS = 1300;
+const SPLASH_FADE_MS = 650; // 与 .app-loading-overlay.fade-out 时长一致
+
+function hasSeenSplash(): boolean {
+  try {
+    return localStorage.getItem(SPLASH_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function markSplashSeen() {
+  try {
+    localStorage.setItem(SPLASH_KEY, '1');
+  } catch {
+    // ignore（隐私模式等场景）
+  }
+}
+
+type SplashState = 'show' | 'fade' | 'done';
 
 function AppContent() {
   const [repos, setRepos] = useState<Repo[]>([]);
@@ -24,7 +47,27 @@ function AppContent() {
   const [githubError, setGithubError] = useState<string | null>(null);
   const [githubTick, setGithubTick] = useState(0);
 
+  // 全屏加载：仅首次访问展示
+  const isFirstVisitRef = useRef<boolean>(!hasSeenSplash());
+  const [splashState, setSplashState] = useState<SplashState>(() =>
+    isFirstVisitRef.current ? 'show' : 'done',
+  );
+
   const { config, loading: configLoading } = useUiConfig();
+
+  useEffect(() => {
+    if (!isFirstVisitRef.current) return;
+    markSplashSeen();
+    const fadeTimer = window.setTimeout(() => setSplashState('fade'), SPLASH_SHOW_MS);
+    const hideTimer = window.setTimeout(
+      () => setSplashState('done'),
+      SPLASH_SHOW_MS + SPLASH_FADE_MS,
+    );
+    return () => {
+      window.clearTimeout(fadeTimer);
+      window.clearTimeout(hideTimer);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -107,38 +150,36 @@ function AppContent() {
     setGithubTick((tick) => tick + 1);
   }, []);
 
-  // 首屏只等待同源的 ui.json；仓库数据异步到达，
-  // 由 Stats/Projects 各自的骨架屏承接，避免整页白屏等待慢速 API。
-  const isLoading = configLoading;
-
-  if (!config) {
-    return <div>配置加载失败</div>;
-  }
-
-  if (isLoading) {
-    return (
-      <div className="app-loading-overlay">
-        <div className="loading-spinner" />
-        <p>加载中...</p>
-      </div>
-    );
-  }
+  // 全屏层：首次访问期间展示；非首次仅当 ui.json 尚未就绪时短暂兜底
+  const showOverlay = splashState !== 'done' || !config;
 
   return (
-    <ThemeProvider>
-      <Layout
-        config={config}
-        repos={repos}
-        reposLoading={reposLoading}
-        reposError={reposError}
-        onRetryRepos={retryRepos}
-        githubEnabled={githubReady && githubConfig !== null}
-        githubRepos={githubRepos}
-        githubLoading={githubLoading}
-        githubError={githubError}
-        onRetryGithub={retryGithub}
-      />
-    </ThemeProvider>
+    <>
+      {showOverlay && (
+        <div className={`app-loading-overlay ${splashState === 'fade' ? 'fade-out' : ''}`}>
+          <div className="loading-spinner" />
+          <p>{isFirstVisitRef.current ? '欢迎来到 ByUsi Studio' : '加载中...'}</p>
+        </div>
+      )}
+      {config ? (
+        <ThemeProvider>
+          <Layout
+            config={config}
+            repos={repos}
+            reposLoading={reposLoading}
+            reposError={reposError}
+            onRetryRepos={retryRepos}
+            githubEnabled={githubReady && githubConfig !== null}
+            githubRepos={githubRepos}
+            githubLoading={githubLoading}
+            githubError={githubError}
+            onRetryGithub={retryGithub}
+          />
+        </ThemeProvider>
+      ) : configLoading ? null : (
+        <div>配置加载失败</div>
+      )}
+    </>
   );
 }
 
