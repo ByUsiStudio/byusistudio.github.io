@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { UiConfigProvider } from './context/UiConfigContext';
 import { useUiConfig } from './context/uiConfig';
@@ -12,6 +12,7 @@ function AppContent() {
   const [repos, setRepos] = useState<Repo[]>([]);
   const [reposLoading, setReposLoading] = useState(true);
   const [reposError, setReposError] = useState<string | null>(null);
+  const [reloadTick, setReloadTick] = useState(0);
   const { config, loading: configLoading } = useUiConfig();
 
   useEffect(() => {
@@ -35,6 +36,12 @@ function AppContent() {
     return () => {
       cancelled = true;
     };
+  }, [reloadTick]);
+
+  const retryRepos = useCallback(() => {
+    setReposLoading(true);
+    setReposError(null);
+    setReloadTick((tick) => tick + 1);
   }, []);
 
   // 首屏只等待同源的 ui.json；仓库数据异步到达，
@@ -56,7 +63,13 @@ function AppContent() {
 
   return (
     <ThemeProvider>
-      <Layout config={config} repos={repos} reposLoading={reposLoading} reposError={reposError} />
+      <Layout
+        config={config}
+        repos={repos}
+        reposLoading={reposLoading}
+        reposError={reposError}
+        onRetryRepos={retryRepos}
+      />
     </ThemeProvider>
   );
 }
