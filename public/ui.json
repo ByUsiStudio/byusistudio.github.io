@@ -4,6 +4,7 @@
     "charset": "UTF-8",
     "viewport": "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
     "title": "ByUsi Studio - 开源创新力量",
+    "configVersion": 1,
     "favicon": {
       "href": "/favicon.png",
       "type": "image/png"
@@ -94,6 +95,12 @@
     },
     "hitokoto": {
       "show": true
+    },
+    "activity": {
+      "show": true,
+      "title": "最近动态",
+      "days": 30,
+      "maxItems": 8
     },
     "footer": {
       "show": true,
