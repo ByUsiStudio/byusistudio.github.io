@@ -21,6 +21,102 @@ interface ReadmeModalProps {
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
 
+// ---- 会话级图片 Blob 缓存 ----
+// 跨弹窗复用，第二次打开同一仓库时无需重新请求 Gitee 图片（修复二次打开图片失效），
+// 仅在页面卸载（pagehide）时统一回收，避免悬空对象 URL 与内存泄漏。
+const sessionImageBlobCache = new Map<string, string>();
+let pageHideBound = false;
+
+function bindPageHideCleanup() {
+  if (pageHideBound || typeof window === 'undefined') return;
+  pageHideBound = true;
+  window.addEventListener(
+    'pagehide',
+    () => {
+      sessionImageBlobCache.forEach((blobUrl) => URL.revokeObjectURL(blobUrl));
+      sessionImageBlobCache.clear();
+    },
+    { once: true },
+  );
+}
+
+async function fetchImageBlobUrl(src: string): Promise<string> {
+  const cached = sessionImageBlobCache.get(src);
+  if (cached) return cached;
+
+  const response = await fetch(src, {
+    mode: 'cors',
+    headers: {
+      Accept: 'image/*',
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  const blob = await response.blob();
+  const blobUrl = URL.createObjectURL(blob);
+  sessionImageBlobCache.set(src, blobUrl);
+  return blobUrl;
+}
+
+// ---- README 清洗策略 ----
+// 在 DOMPurify 默认（去脚本/事件/危险协议）基础上放行 README 中常见的
+// 排版 HTML 与属性（details/居中/表格对齐/行内样式等），保持相对安全的底线。
+const SANITIZE_CONFIG = {
+  ADD_TAGS: [
+    'details',
+    'summary',
+    'center',
+    'mark',
+    'kbd',
+    'var',
+    'samp',
+    'strike',
+    'u',
+    'abbr',
+    'bdi',
+    'bdo',
+    'data',
+    'time',
+    'wbr',
+    'figure',
+    'figcaption',
+    'picture',
+    'source',
+    'section',
+    'article',
+    'aside',
+    'header',
+    'footer',
+    'nav',
+    'main',
+    'hgroup',
+  ],
+  ADD_ATTR: [
+    'data-src',
+    'align',
+    'width',
+    'height',
+    'style',
+    'start',
+    'border',
+    'cellpadding',
+    'cellspacing',
+    'valign',
+    'bgcolor',
+    'colspan',
+    'rowspan',
+    'loading',
+    'decoding',
+  ],
+};
+
+interface TocItem {
+  id: string;
+  text: string;
+  level: number;
+}
+
 export function ReadmeModal({
   repoName,
   repoFullName,
@@ -33,17 +129,11 @@ export function ReadmeModal({
   const [error, setError] = useState<string | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);
+  const [toc, setToc] = useState<TocItem[]>([]);
   const markdownRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const codeBlocksRef = useRef<{ code: string; lang: string }[]>([]);
-  const blobCacheRef = useRef<Map<string, string>>(new Map());
-
-  const revokeBlobUrls = useCallback(() => {
-    blobCacheRef.current.forEach((blobUrl) => {
-      URL.revokeObjectURL(blobUrl);
-    });
-    blobCacheRef.current.clear();
-  }, []);
 
   const handleCopy = useCallback(async (code: string, index: number) => {
     try {
@@ -58,10 +148,9 @@ export function ReadmeModal({
   const handleClose = useCallback(() => {
     setIsClosing(true);
     setTimeout(() => {
-      revokeBlobUrls();
       onClose();
     }, 500);
-  }, [onClose, revokeBlobUrls]);
+  }, [onClose]);
 
   // 供一次性挂载的键盘监听读取最新 close 函数，避免重复订阅
   const handleCloseRef = useRef(handleClose);
@@ -76,6 +165,8 @@ export function ReadmeModal({
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+
+    bindPageHideCleanup();
 
     const focusTimer = window.setTimeout(() => {
       (panel?.querySelector<HTMLElement>('.readme-modal-close') ?? panel)?.focus({
@@ -213,115 +304,93 @@ export function ReadmeModal({
     };
   }, [repoFullName, onFetch, convertRelativePaths]);
 
+  // 图片加载：单图加载 + 失败标记（点击可重试）
+  const loadSingleImage = useCallback(async (imgEl: HTMLImageElement) => {
+    const src = imgEl.getAttribute('data-src');
+    if (!src) {
+      imgEl.classList.remove('image-loading');
+      imgEl.classList.add('image-error');
+      return;
+    }
+
+    const markFailed = () => {
+      imgEl.classList.remove('image-loading');
+      imgEl.classList.add('image-error');
+      imgEl.setAttribute('data-failed', '1');
+      imgEl.title = '图片加载失败，点击重试';
+    };
+
+    imgEl.classList.remove('image-error');
+    imgEl.classList.add('image-loading');
+    try {
+      const displaySrc = src.includes('gitee.com') ? await fetchImageBlobUrl(src) : src;
+      imgEl.removeAttribute('data-failed');
+      imgEl.onload = () => {
+        imgEl.classList.remove('image-loading');
+        imgEl.classList.add('image-loaded');
+      };
+      imgEl.onerror = () => {
+        markFailed();
+      };
+      imgEl.src = displaySrc;
+    } catch (err) {
+      console.error(`[Image Load Failed] ${src}:`, err);
+      markFailed();
+    }
+  }, []);
+
   useEffect(() => {
     if (!markdownRef.current) return;
 
-    const images = markdownRef.current.querySelectorAll('img.readme-image');
-    const imgElements = Array.from(images) as HTMLImageElement[];
+    const imgElements = Array.from(
+      markdownRef.current.querySelectorAll<HTMLImageElement>('img.readme-image'),
+    );
 
     imgElements.forEach((imgEl) => {
-      imgEl.classList.add('image-loading');
+      // 失败图片点击重试
+      imgEl.onclick = () => {
+        if (imgEl.hasAttribute('data-failed')) {
+          loadSingleImage(imgEl);
+        }
+      };
+      loadSingleImage(imgEl);
     });
+  }, [content, loadSingleImage]);
 
-    const fetchAndConvertImages = async () => {
-      const giteePromises: Promise<{
-        imgEl: HTMLImageElement;
-        originalSrc: string;
-        blobUrl: string | null;
-        success: boolean;
-        fromCache: boolean;
-      }>[] = [];
-      const nonGiteeImages: HTMLImageElement[] = [];
+  // 目录：为 h2/h3 生成锚点
+  useEffect(() => {
+    if (!markdownRef.current) {
+      setToc([]);
+      return;
+    }
 
-      imgElements.forEach((imgEl) => {
-        const originalSrc = imgEl.getAttribute('data-src');
-        if (!originalSrc) {
-          imgEl.classList.remove('image-loading');
-          imgEl.classList.add('image-error');
-          return;
-        }
+    const headings = Array.from(
+      markdownRef.current.querySelectorAll<HTMLElement>('h2, h3'),
+    ).filter((el) => el.textContent?.trim());
 
-        if (originalSrc.includes('gitee.com')) {
-          giteePromises.push(
-            (async () => {
-              const cachedUrl = blobCacheRef.current.get(originalSrc);
-              if (cachedUrl) {
-                return { imgEl, originalSrc, blobUrl: cachedUrl, success: true, fromCache: true };
-              }
+    if (headings.length === 0) {
+      setToc([]);
+      return;
+    }
 
-              try {
-                const response = await fetch(originalSrc, {
-                  mode: 'cors',
-                  headers: {
-                    Accept: 'image/*',
-                  },
-                });
-                if (!response.ok) {
-                  throw new Error(`HTTP error! status: ${response.status}`);
-                }
+    const items: TocItem[] = headings.map((el, index) => {
+      const level = el.tagName === 'H3' ? 3 : 2;
+      const id = `readme-h-${index}`;
+      el.id = id;
+      el.tabIndex = -1;
+      return { id, text: el.textContent?.trim() ?? '', level };
+    });
+    setToc(items);
+  }, [content]);
 
-                const blob = await response.blob();
-                const blobUrl = URL.createObjectURL(blob);
-                blobCacheRef.current.set(originalSrc, blobUrl);
-
-                return { imgEl, originalSrc, blobUrl, success: true, fromCache: false };
-              } catch (err) {
-                console.error(`[Blob Fetch Failed] ${originalSrc}:`, err);
-                return { imgEl, originalSrc, blobUrl: null, success: false, fromCache: false };
-              }
-            })(),
-          );
-        } else {
-          nonGiteeImages.push(imgEl);
-        }
-      });
-
-      nonGiteeImages.forEach((imgEl) => {
-        const originalSrc = imgEl.getAttribute('data-src');
-        if (originalSrc) {
-          imgEl.src = originalSrc;
-          imgEl.classList.remove('image-loading');
-          imgEl.classList.add('image-loaded');
-        } else {
-          imgEl.classList.remove('image-loading');
-          imgEl.classList.add('image-error');
-        }
-      });
-
-      const results = await Promise.all(giteePromises);
-
-      results.forEach((result) => {
-        const { imgEl, originalSrc, blobUrl, success } = result;
-
-        if (success && blobUrl) {
-          imgEl.src = blobUrl;
-
-          imgEl.onload = () => {
-            imgEl.classList.remove('image-loading');
-            imgEl.classList.add('image-loaded');
-          };
-          imgEl.onerror = () => {
-            imgEl.classList.remove('image-loading');
-            imgEl.classList.add('image-error');
-            const cached = blobCacheRef.current.get(originalSrc);
-            if (cached) {
-              URL.revokeObjectURL(cached);
-              blobCacheRef.current.delete(originalSrc);
-            }
-          };
-        } else {
-          imgEl.classList.remove('image-loading');
-          imgEl.classList.add('image-error');
-        }
-      });
-    };
-
-    fetchAndConvertImages();
-
-    return () => {
-      revokeBlobUrls();
-    };
-  }, [content, revokeBlobUrls]);
+  const jumpToHeading = useCallback((id: string) => {
+    const heading = markdownRef.current?.querySelector<HTMLElement>(`#${CSS.escape(id)}`);
+    if (!heading) return;
+    heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    heading.focus({ preventScroll: true });
+    heading.classList.add('heading-highlight');
+    window.setTimeout(() => heading.classList.remove('heading-highlight'), 1600);
+  }, []);
 
   useEffect(() => {
     if (!markdownRef.current) return;
@@ -340,6 +409,14 @@ export function ReadmeModal({
         hljs.highlightElement(codeBlock as HTMLElement);
       } catch (err) {
         console.warn('代码高亮失败:', err);
+      }
+
+      // 语言角标
+      if (lang && lang !== 'plaintext' && !parentPre.querySelector('.code-lang-tag')) {
+        const tag = document.createElement('span');
+        tag.className = 'code-lang-tag';
+        tag.textContent = lang;
+        parentPre.appendChild(tag);
       }
 
       const existingBtn = parentPre.querySelector('.copy-btn');
@@ -373,9 +450,7 @@ export function ReadmeModal({
 
   const renderMarkdown = useCallback(() => {
     if (!content) return null;
-    const sanitized = DOMPurify.sanitize(content, {
-      ADD_ATTR: ['data-src'],
-    });
+    const sanitized = DOMPurify.sanitize(content, SANITIZE_CONFIG);
     return (
       <div
         ref={markdownRef}
@@ -410,7 +485,7 @@ export function ReadmeModal({
           </button>
         </div>
 
-        <div className="readme-modal-body">
+        <div ref={bodyRef} className="readme-modal-body">
           {loading ? (
             <div className="readme-loading">
               <div className="loading-spinner"></div>
@@ -422,7 +497,34 @@ export function ReadmeModal({
               <p>{error}</p>
             </div>
           ) : content ? (
-            renderMarkdown()
+            <>
+              {toc.length > 1 && (
+                <nav className="readme-toc" aria-label="README 目录">
+                  <button
+                    type="button"
+                    className="readme-toc-toggle"
+                    aria-expanded={true}
+                    onClick={(e) => {
+                      const nav = e.currentTarget.closest('.readme-toc') as HTMLElement;
+                      nav?.classList.toggle('collapsed');
+                    }}
+                  >
+                    <i className="fas fa-list-ul"></i> 目录
+                    <i className="fas fa-chevron-up readme-toc-arrow"></i>
+                  </button>
+                  <ul className="readme-toc-list">
+                    {toc.map((item) => (
+                      <li key={item.id} className={`readme-toc-item level-${item.level}`}>
+                        <button type="button" onClick={() => jumpToHeading(item.id)}>
+                          {item.text}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              )}
+              {renderMarkdown()}
+            </>
           ) : (
             <div className="readme-empty">
               <i className="fas fa-file-alt"></i>
