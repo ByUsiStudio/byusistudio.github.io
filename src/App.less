@@ -5285,3 +5285,170 @@ a {
   color: #fff;
   background: var(--primary, #3498db);
 }
+
+/* ===== UI 精细打磨（全局覆盖，尽量后置以保证优先级） ===== */
+
+/* 键盘可达性：统一定位焦点环 */
+:focus-visible {
+  outline: 2px solid rgba(var(--primary-rgb, 52, 152, 219), 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button,
+input,
+select,
+textarea,
+a {
+  font-family: inherit;
+}
+
+button:not(:disabled),
+[role='button']:not(:disabled) {
+  cursor: pointer;
+}
+
+/* 空态/错误态内的重试按钮居中与间距 */
+.empty-state .notice-retry-btn,
+.stats-error .notice-retry-btn {
+  margin-top: 8px;
+}
+
+/* README 内容防溢出：图片、代码、长词、表格 */
+.readme-markdown-full {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.readme-markdown-full img {
+  max-width: 100%;
+  height: auto;
+}
+
+.readme-markdown-full pre {
+  overflow-x: auto;
+}
+
+.readme-markdown-full pre code {
+  word-break: normal;
+  white-space: pre;
+}
+
+.readme-markdown-full table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.readme-markdown-full img.readme-image.image-loading {
+  min-height: 36px;
+  background: rgba(var(--primary-rgb, 52, 152, 219), 0.06);
+}
+
+/* README 图片提示文字（加载中/失败） */
+.readme-markdown-full img.readme-image[data-failed]::after {
+  content: '加载失败';
+}
+
+/* 细滚动条（弹窗正文 / 面板列表 / 目录 / 语言分布） */
+.readme-modal-body,
+.palette-body,
+.readme-toc-list,
+.lang-dist-bars {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(127, 140, 141, 0.4) transparent;
+}
+
+.readme-modal-body::-webkit-scrollbar,
+.palette-body::-webkit-scrollbar,
+.readme-toc-list::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.readme-modal-body::-webkit-scrollbar-thumb,
+.palette-body::-webkit-scrollbar-thumb,
+.readme-toc-list::-webkit-scrollbar-thumb {
+  background: rgba(127, 140, 141, 0.35);
+  border-radius: 4px;
+}
+
+/* 命令面板：小屏适配 + 输入字号（>16px 避免 iOS 聚焦缩放） */
+.palette-input {
+  font-size: 16px;
+}
+
+.palette-overlay {
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .palette-overlay {
+    align-items: flex-start;
+    padding-top: 8vh;
+  }
+
+  .palette-footer {
+    flex-wrap: wrap;
+    gap: 8px 14px;
+  }
+
+  .palette-item-meta {
+    display: none;
+  }
+
+  .config-update-banner {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+/* GitHub / 最近动态卡片视觉统一（圆角、悬浮层级、禁文本选中抖动） */
+#github-projects .project-item,
+.activity-item {
+  border-radius: 12px;
+}
+
+#github-projects .project-list:not(.double-column) .project-item:first-child {
+  border-radius: 12px 12px 0 0;
+}
+
+#github-projects .project-item {
+  transition:
+    transform 0.28s @ease-out-back,
+    box-shadow 0.28s ease,
+    border-color 0.28s ease;
+}
+
+/* 语言构成标题与 section-title 视觉一致 */
+.lang-dist-title {
+  color: var(--secondary, #2c3e50);
+}
+
+/* 最近动态标题里的小字计数等保持一致排版 */
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.section-title::after {
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* 移动端纵向节奏 */
+@media (max-width: 576px) {
+  .section {
+    padding: 56px 0;
+  }
+
+  .section-title {
+    margin-bottom: 36px;
+  }
+}

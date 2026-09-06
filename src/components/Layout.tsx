@@ -10,6 +10,7 @@ import { Team } from './Team';
 import { Hitokoto } from './Hitokoto';
 import { Footer } from './Footer';
 import { ScrollProgress } from './ScrollProgress';
+import { ScrollReveal } from './ScrollReveal';
 import { BackToTop } from './BackToTop';
 import { CookieRecord } from './CookieRecord';
 import { MouseFollower } from './MouseFollower';
@@ -73,6 +74,7 @@ export function Layout({
   return (
     <div className="app-content-wrapper">
       <HeadConfig />
+      <ScrollReveal />
       <MouseFollower />
       <ScrollProgress />
       {navbar.sticky && <Header />}

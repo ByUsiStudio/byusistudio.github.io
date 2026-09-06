@@ -119,9 +119,11 @@ export function GithubProjects({ repos, loading, error, onRetry }: GithubProject
 
         {filtered.length === 0 ? (
           <div className="empty-state">
-            <i className="fas fa-search"></i>
-            <h3>未找到匹配的 GitHub 项目</h3>
-            <p>尝试使用其他搜索词</p>
+            <i className={`fas ${repos.length === 0 ? 'fa-folder-open' : 'fa-search'}`}></i>
+            <h3>{repos.length === 0 ? '该组织暂无公开项目' : '未找到匹配的 GitHub 项目'}</h3>
+            <p>
+              {repos.length === 0 ? '当前 GitHub 配置的组织名下没有公开仓库' : '尝试使用其他搜索词'}
+            </p>
           </div>
         ) : (
           <>
