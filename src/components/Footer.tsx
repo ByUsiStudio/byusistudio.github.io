@@ -1,4 +1,4 @@
-import { useUiConfig } from '../context/UiConfigContext';
+import { useUiConfig } from '../context/uiConfig';
 import type { Repo } from '../types/ui';
 
 interface FooterProps {

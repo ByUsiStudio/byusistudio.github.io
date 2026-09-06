@@ -58,11 +58,7 @@ interface JCuPupwInstance {
   close(): Promise<boolean>;
   setTitle(title: string): this;
   setContent(content: string): this;
-  addButton(
-    text: string,
-    action?: () => void,
-    type?: 'default' | 'primary' | 'danger'
-  ): this;
+  addButton(text: string, action?: () => void, type?: 'default' | 'primary' | 'danger'): this;
   showLoading(): this;
   hideLoading(): this;
   alert(options?: JCuPupwAlertOptions): Promise<void>;
@@ -72,7 +68,7 @@ interface JCuPupwInstance {
   isOpen(): boolean;
   destroy(): void;
   on(event: string, callback: () => void): void;
-  registerMethod(name: string, fn: (...args: any[]) => any): void;
+  registerMethod(name: string, fn: (...args: unknown[]) => unknown): void;
 }
 
 interface JCuPupwStatic {

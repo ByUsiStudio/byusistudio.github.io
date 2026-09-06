@@ -1,32 +1,6 @@
 import { useEffect } from 'react';
-import { useUiConfig } from '../context/UiConfigContext';
-
-interface StylesheetConfig {
-  href: string;
-  integrity?: string;
-  crossorigin?: string;
-  referrerpolicy?: string;
-}
-
-interface PreloadConfig {
-  href: string;
-  as: string;
-  type?: string;
-}
-
-interface HeadConfigType {
-  lang: string;
-  charset: string;
-  viewport: string;
-  title: string;
-  favicon: {
-    href: string;
-    type: string;
-  };
-  stylesheets: StylesheetConfig[];
-  preconnect: string[];
-  preload: PreloadConfig[];
-}
+import { useUiConfig } from '../context/uiConfig';
+import type { UiHeadConfig } from '../types/ui';
 
 export function HeadConfig() {
   const { config } = useUiConfig();
@@ -34,7 +8,7 @@ export function HeadConfig() {
   useEffect(() => {
     if (!config) return;
 
-    const head = config.head as HeadConfigType;
+    const head: UiHeadConfig = config.head;
 
     // lang
     document.documentElement.lang = head.lang;

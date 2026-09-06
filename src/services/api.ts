@@ -8,6 +8,8 @@ interface CacheData {
 
 const CACHE_KEY = 'byusi_repos_cache';
 const README_CACHE_KEY_PREFIX = 'byusi_readme_cache_';
+// README 本地缓存条目数上限（超出后按写入时间淘汰最旧条目，防止 localStorage 膨胀）
+const MAX_README_CACHE = 30;
 
 function getCache(cacheLifetime: number): Repo[] | null {
   try {
@@ -29,10 +31,26 @@ function setCache(data: Repo[]) {
   }
 }
 
+interface GiteeRepoRaw {
+  id: number;
+  name: string;
+  full_name: string;
+  description?: string | null;
+  html_url: string;
+  language: string | null;
+  stargazers_count?: number;
+  forks_count?: number;
+  updated_at: string;
+  created_at?: string;
+  archived?: boolean;
+  has_issues?: boolean;
+  open_issues_count?: number;
+}
+
 export async function fetchRepos(): Promise<Repo[]> {
   const config = await loadApiConfig();
   const CACHE_LIFETIME = config.api.cacheLifetime * 1000;
-  
+
   const cached = getCache(CACHE_LIFETIME);
   if (cached) return cached;
 
@@ -51,9 +69,9 @@ export async function fetchRepos(): Promise<Repo[]> {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as GiteeRepoRaw[];
 
-    const repos: Repo[] = data.map((repo: any) => ({
+    const repos: Repo[] = data.map((repo) => ({
       id: repo.id,
       name: repo.name,
       full_name: repo.full_name,
@@ -63,7 +81,7 @@ export async function fetchRepos(): Promise<Repo[]> {
       stargazers_count: repo.stargazers_count || 0,
       forks_count: repo.forks_count || 0,
       updated_at: repo.updated_at,
-      created_at: repo.created_at,
+      created_at: repo.created_at || '',
       archived: repo.archived || false,
       has_issues: repo.has_issues || false,
       open_issues_count: repo.open_issues_count || 0,
@@ -91,7 +109,10 @@ interface ReadmeCacheData {
   timestamp: number;
 }
 
-function getReadmeCache(repoFullName: string, cacheLifetime: number): { content: string; repoFullName: string } | null {
+function getReadmeCache(
+  repoFullName: string,
+  cacheLifetime: number,
+): { content: string; repoFullName: string } | null {
   try {
     const key = `${README_CACHE_KEY_PREFIX}${repoFullName}`;
     const raw = localStorage.getItem(key);
@@ -104,10 +125,37 @@ function getReadmeCache(repoFullName: string, cacheLifetime: number): { content:
   }
 }
 
+function trimReadmeCache() {
+  try {
+    const entries: Array<{ key: string; timestamp: number }> = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith(README_CACHE_KEY_PREFIX)) continue;
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+        const parsed = JSON.parse(raw) as ReadmeCacheData;
+        entries.push({
+          key,
+          timestamp: typeof parsed.timestamp === 'number' ? parsed.timestamp : 0,
+        });
+      } catch {
+        // 单条解析失败不影响整体淘汰
+      }
+    }
+    if (entries.length <= MAX_README_CACHE) return;
+    entries.sort((a, b) => b.timestamp - a.timestamp);
+    entries.slice(MAX_README_CACHE).forEach((entry) => localStorage.removeItem(entry.key));
+  } catch {
+    // storage might be unavailable
+  }
+}
+
 function setReadmeCache(repoFullName: string, content: string) {
   try {
     const key = `${README_CACHE_KEY_PREFIX}${repoFullName}`;
     localStorage.setItem(key, JSON.stringify({ content, repoFullName, timestamp: Date.now() }));
+    trimReadmeCache();
   } catch {
     // storage might be full
   }
@@ -130,23 +178,32 @@ export interface HitokotoData {
   from_who?: string;
 }
 
+const HITOKOTO_FETCH_TIMEOUT = 8000;
+
 export async function fetchHitokoto(): Promise<HitokotoData> {
-  const response = await fetch('https://api.www.cdifit.cn/yy/?encode=json', {
-    headers: {
-      Accept: 'application/json',
-    },
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), HITOKOTO_FETCH_TIMEOUT);
+  try {
+    const response = await fetch('https://api.www.cdifit.cn/yy/?encode=json', {
+      headers: {
+        Accept: 'application/json',
+      },
+      signal: controller.signal,
+    });
 
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return {
+      hitokoto: data.hitokoto,
+      from: data.from,
+      from_who: data.from_who,
+    };
+  } finally {
+    clearTimeout(timer);
   }
-
-  const data = await response.json();
-  return {
-    hitokoto: data.hitokoto,
-    from: data.from,
-    from_who: data.from_who,
-  };
 }
 
 export async function fetchReadme(repoFullName: string): Promise<ReadmeData> {

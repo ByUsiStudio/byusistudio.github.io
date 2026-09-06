@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
-import { UiConfigProvider, useUiConfig } from './context/UiConfigContext';
+import { UiConfigProvider } from './context/UiConfigContext';
+import { useUiConfig } from './context/uiConfig';
 import { Layout } from './components/Layout';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { fetchRepos } from './services/api';
@@ -36,7 +37,9 @@ function AppContent() {
     };
   }, []);
 
-  const isLoading = configLoading || reposLoading;
+  // 首屏只等待同源的 ui.json；仓库数据异步到达，
+  // 由 Stats/Projects 各自的骨架屏承接，避免整页白屏等待慢速 API。
+  const isLoading = configLoading;
 
   if (!config) {
     return <div>配置加载失败</div>;
@@ -53,12 +56,7 @@ function AppContent() {
 
   return (
     <ThemeProvider>
-      <Layout
-        config={config}
-        repos={repos}
-        reposLoading={reposLoading}
-        reposError={reposError}
-      />
+      <Layout config={config} repos={repos} reposLoading={reposLoading} reposError={reposError} />
     </ThemeProvider>
   );
 }

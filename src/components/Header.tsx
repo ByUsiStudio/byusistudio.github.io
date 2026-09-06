@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useTheme } from '../context/ThemeContext';
-import { useUiConfig } from '../context/UiConfigContext';
+import { useTheme } from '../context/theme';
+import { useUiConfig } from '../context/uiConfig';
 
 export function Header() {
   const { theme } = useTheme();
@@ -37,18 +37,20 @@ export function Header() {
   return (
     <nav
       className={`navbar ${scrolled ? 'scrolled' : ''}`}
-      style={{
-        '--nav-bg': `${theme['card-bg']}cc`,
-        '--nav-bg-scrolled': `${theme['card-bg']}ee`,
-        '--nav-shadow': `0 4px 30px rgba(0, 0, 0, 0.08)`,
-        '--nav-shadow-scrolled': `0 8px 40px rgba(0, 0, 0, 0.12)`,
-        '--nav-height': `${navbar.height}px`,
-        '--secondary': theme.secondary,
-        '--primary': theme.primary,
-        '--text-color': theme['text-color'],
-        '--card-bg': theme['card-bg'],
-        '--shadow': theme.shadow,
-      } as React.CSSProperties}
+      style={
+        {
+          '--nav-bg': `${theme['card-bg']}cc`,
+          '--nav-bg-scrolled': `${theme['card-bg']}ee`,
+          '--nav-shadow': `0 4px 30px rgba(0, 0, 0, 0.08)`,
+          '--nav-shadow-scrolled': `0 8px 40px rgba(0, 0, 0, 0.12)`,
+          '--nav-height': `${navbar.height}px`,
+          '--secondary': theme.secondary,
+          '--primary': theme.primary,
+          '--text-color': theme['text-color'],
+          '--card-bg': theme['card-bg'],
+          '--shadow': theme.shadow,
+        } as React.CSSProperties
+      }
     >
       <div className="navbar-container" style={{ height: `${navbar.height}px` }}>
         <a
@@ -70,7 +72,10 @@ export function Header() {
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-label={isMobileMenuOpen ? '关闭菜单' : '打开菜单'}
         >
-          <i className={`fas ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'}`} style={{ color: theme.secondary }} />
+          <i
+            className={`fas ${isMobileMenuOpen ? 'fa-times' : 'fa-bars'}`}
+            style={{ color: theme.secondary }}
+          />
         </button>
 
         <div className={`nav-links ${isMobileMenuOpen ? 'active' : ''}`}>

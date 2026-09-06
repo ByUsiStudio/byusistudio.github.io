@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../context/theme';
 import { useCookieRecord } from '../hooks/useCookieRecord';
 
 export function CookieRecord() {
@@ -61,11 +61,7 @@ export function CookieRecord() {
             <h4>Cookie 记录</h4>
             <span className="cookie-subtitle">仅本地保存 · 服务器不记录</span>
           </div>
-          <button
-            className="cookie-close"
-            onClick={() => setExpanded(false)}
-            aria-label="收起"
-          >
+          <button className="cookie-close" onClick={() => setExpanded(false)} aria-label="收起">
             <i className="fas fa-times"></i>
           </button>
         </div>
@@ -100,7 +96,10 @@ export function CookieRecord() {
             title={ipStatus === 'error' ? '点击重试' : undefined}
           >
             <span className="cookie-detail-label">
-              <i className={`fas ${ipStatus === 'loading' ? 'fa-circle-notch fa-spin' : 'fa-globe'}`}></i> 当前 IP
+              <i
+                className={`fas ${ipStatus === 'loading' ? 'fa-circle-notch fa-spin' : 'fa-globe'}`}
+              ></i>{' '}
+              当前 IP
             </span>
             <span className="cookie-detail-value ip-value">
               {ipStatus === 'loading' && '获取中...'}

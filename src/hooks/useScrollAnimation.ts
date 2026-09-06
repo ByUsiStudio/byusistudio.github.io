@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 
-type AnimationType = 
+type AnimationType =
   | 'slide-up'
   | 'slide-down'
   | 'slide-left'
@@ -28,8 +28,8 @@ const animationTypeMap: Record<AnimationType, string> = {
   'slide-down': 'scroll-animate-up',
   'slide-left': 'scroll-animate-right',
   'slide-right': 'scroll-animate-left',
-  'fade': 'scroll-animate-fade',
-  'scale': 'scroll-animate-scale',
+  fade: 'scroll-animate-fade',
+  scale: 'scroll-animate-scale',
   'fade-up': 'scroll-animate',
   'fade-down': 'scroll-animate-up',
   'fade-left': 'scroll-animate-right',
@@ -52,67 +52,73 @@ export function useScrollAnimation(options: UseScrollAnimationOptions = {}) {
   const observedElementsRef = useRef<Map<HTMLElement, number>>(new Map());
   const indexCounterRef = useRef(0);
 
-  const observe = useCallback((elements: HTMLElement[]) => {
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
-
-    const baseAnimationClass = animationTypeMap[animationType] || 'scroll-animate';
-
-    elements.forEach((element, index) => {
-      element.classList.add(baseAnimationClass);
-      observedElementsRef.current.set(element, indexCounterRef.current + index);
-    });
-    indexCounterRef.current += elements.length;
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const element = entry.target as HTMLElement;
-          const elementIndex = observedElementsRef.current.get(element) || 0;
-          const delay = staggerDelay * elementIndex;
-
-          if (entry.isIntersecting) {
-            if (delay > 0) {
-              element.style.transitionDelay = `${delay}ms`;
-            }
-            element.classList.add(animationClass);
-            onEnter?.(element);
-
-            if (once) {
-              observerRef.current?.unobserve(element);
-            }
-          } else {
-            if (!once) {
-              element.classList.remove(animationClass);
-              element.style.transitionDelay = '';
-              onLeave?.(element);
-            }
-          }
-        });
-      },
-      {
-        threshold,
-        rootMargin,
+  const observe = useCallback(
+    (elements: HTMLElement[]) => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
       }
-    );
 
-    elements.forEach((element) => {
+      const baseAnimationClass = animationTypeMap[animationType] || 'scroll-animate';
+
+      elements.forEach((element, index) => {
+        element.classList.add(baseAnimationClass);
+        observedElementsRef.current.set(element, indexCounterRef.current + index);
+      });
+      indexCounterRef.current += elements.length;
+
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const element = entry.target as HTMLElement;
+            const elementIndex = observedElementsRef.current.get(element) || 0;
+            const delay = staggerDelay * elementIndex;
+
+            if (entry.isIntersecting) {
+              if (delay > 0) {
+                element.style.transitionDelay = `${delay}ms`;
+              }
+              element.classList.add(animationClass);
+              onEnter?.(element);
+
+              if (once) {
+                observerRef.current?.unobserve(element);
+              }
+            } else {
+              if (!once) {
+                element.classList.remove(animationClass);
+                element.style.transitionDelay = '';
+                onLeave?.(element);
+              }
+            }
+          });
+        },
+        {
+          threshold,
+          rootMargin,
+        },
+      );
+
+      elements.forEach((element) => {
+        observerRef.current?.observe(element);
+      });
+    },
+    [threshold, rootMargin, once, animationClass, animationType, staggerDelay, onEnter, onLeave],
+  );
+
+  const observeSingle = useCallback(
+    (element: HTMLElement) => {
+      if (!observerRef.current) {
+        observe([]);
+      }
+
+      const baseAnimationClass = animationTypeMap[animationType] || 'scroll-animate';
+      element.classList.add(baseAnimationClass);
+      observedElementsRef.current.set(element, indexCounterRef.current++);
+
       observerRef.current?.observe(element);
-    });
-  }, [threshold, rootMargin, once, animationClass, animationType, staggerDelay, onEnter, onLeave]);
-
-  const observeSingle = useCallback((element: HTMLElement) => {
-    if (!observerRef.current) {
-      observe([]);
-    }
-
-    const baseAnimationClass = animationTypeMap[animationType] || 'scroll-animate';
-    element.classList.add(baseAnimationClass);
-    observedElementsRef.current.set(element, indexCounterRef.current++);
-
-    observerRef.current?.observe(element);
-  }, [animationType, observe]);
+    },
+    [animationType, observe],
+  );
 
   const unobserve = useCallback(() => {
     if (observerRef.current) {
@@ -135,26 +141,26 @@ export function useStaggeredAnimation(
   containerRef: React.RefObject<HTMLElement | null>,
   options: Omit<UseScrollAnimationOptions, 'animationClass'> & {
     selector?: string;
-  } = {}
+  } = {},
 ) {
   const { selector = '> *', ...scrollOptions } = options;
+
+  // Hook 在自定义 Hook 顶层调用（不能在 effect 回调中调用），
+  // effect 内只负责观测与清理。
+  const { observe, unobserve } = useScrollAnimation({
+    ...scrollOptions,
+    staggerDelay: scrollOptions.staggerDelay || 100,
+  });
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const elements = Array.from(
-      containerRef.current.querySelectorAll<HTMLElement>(selector)
-    );
-
-    const { observe, unobserve } = useScrollAnimation({
-      ...scrollOptions,
-      staggerDelay: scrollOptions.staggerDelay || 100,
-    });
+    const elements = Array.from(containerRef.current.querySelectorAll<HTMLElement>(selector));
 
     observe(elements);
 
     return () => {
       unobserve();
     };
-  }, [containerRef, selector, scrollOptions]);
+  }, [containerRef, selector, observe, unobserve]);
 }

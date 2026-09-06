@@ -1,5 +1,5 @@
-import { useTheme } from '../context/ThemeContext';
-import { useUiConfig } from '../context/UiConfigContext';
+import { useTheme } from '../context/theme';
+import { useUiConfig } from '../context/uiConfig';
 import { Typewriter } from './Typewriter';
 
 export function Hero() {
@@ -22,13 +22,15 @@ export function Hero() {
     <section
       id="home"
       className="hero"
-      style={{
-        '--primary': theme.primary,
-        '--secondary': theme.secondary,
-        '--dark-gray': theme['dark-gray'],
-        '--bg-color': theme['bg-color'],
-        '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
-      } as React.CSSProperties}
+      style={
+        {
+          '--primary': theme.primary,
+          '--secondary': theme.secondary,
+          '--dark-gray': theme['dark-gray'],
+          '--bg-color': theme['bg-color'],
+          '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
+        } as React.CSSProperties
+      }
     >
       <div className="hero-particles">
         {[...Array(25)].map((_, i) => (
@@ -83,7 +85,7 @@ export function Hero() {
                   <i className={btn.icon}></i>
                   {btn.label}
                 </a>
-              )
+              ),
             )}
           </div>
         </div>

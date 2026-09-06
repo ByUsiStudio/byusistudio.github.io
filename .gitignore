@@ -6,7 +6,7 @@ server/.env
 
 # ESLint / Prettier cache
 .eslintcache
-.pttierignore
+.prettierignore
 
 # OS / editor
 .DS_Store

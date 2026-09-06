@@ -67,14 +67,22 @@ function fetchWithTimeout(url: string, timeout: number): Promise<Response> {
   return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
 }
 
-// IP 提供商列表（不同解析路径，多源容错）
-const IP_PROVIDERS: Array<{ url: string; extract: (data: any) => string }> = [
-  { url: 'https://api.ipify.org?format=json', extract: (d) => d.ip },
-  { url: 'https://ipwho.is/', extract: (d) => d.ip },
-  { url: 'https://api.ip.sb/jsonip', extract: (d) => d.ip },
-  { url: 'https://jsonip.com', extract: (d) => d.ip },
-  { url: 'https://ipapi.co/json/', extract: (d) => d.ip },
-];
+// IP 提供商列表（不同解析路径，多源容错），响应均为 JSON { "ip": string }
+const IP_PROVIDER_URLS = [
+  'https://api.ipify.org?format=json',
+  'https://ipwho.is/',
+  'https://api.ip.sb/jsonip',
+  'https://jsonip.com',
+  'https://ipapi.co/json/',
+] as const;
+
+function extractIpField(data: unknown): string {
+  if (typeof data === 'object' && data !== null && 'ip' in data) {
+    const ip = (data as { ip?: unknown }).ip;
+    return typeof ip === 'string' ? ip : '';
+  }
+  return '';
+}
 
 // 手动实现「首胜」语义：任一 promise fulfilled 即 resolve；
 // 全部 rejected 则 resolve 空串（避免依赖 Promise.any 的 target 要求）
@@ -92,26 +100,28 @@ function firstFulfilled(promises: Promise<string>[]): Promise<string> {
           settled = true;
           resolve(val);
         }
-      }).catch(() => {
-        // 忽略单个失败
-      }).finally(() => {
-        pending -= 1;
-        if (pending === 0 && !settled) {
-          resolve('');
-        }
-      });
+      })
+        .catch(() => {
+          // 忽略单个失败
+        })
+        .finally(() => {
+          pending -= 1;
+          if (pending === 0 && !settled) {
+            resolve('');
+          }
+        });
     });
   });
 }
 
 // 通过多个公共 API 竞速获取 IP（服务器不记录），取最快成功者
 async function fetchClientIp(): Promise<string> {
-  const tasks = IP_PROVIDERS.map(async ({ url, extract }) => {
+  const tasks = IP_PROVIDER_URLS.map(async (url) => {
     const res = await fetchWithTimeout(url, IP_FETCH_TIMEOUT);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const ip = extract(data);
-    if (!ip || typeof ip !== 'string') throw new Error('无效 IP');
+    const data: unknown = await res.json();
+    const ip = extractIpField(data);
+    if (!ip) throw new Error('无效 IP');
     return ip;
   });
 

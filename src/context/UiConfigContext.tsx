@@ -1,14 +1,9 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
+import { UiConfigContext } from './uiConfig';
+import type { UiConfigContextType } from './uiConfig';
 import type { UiConfig } from '../types/ui';
 import { loadUiConfig } from '../services/config';
-
-interface UiConfigContextType {
-  config: UiConfig | null;
-  loading: boolean;
-  error: string | null;
-}
-
-const UiConfigContext = createContext<UiConfigContextType | undefined>(undefined);
 
 export function UiConfigProvider({ children }: { children: ReactNode }) {
   const [config, setConfig] = useState<UiConfig | null>(null);
@@ -27,17 +22,7 @@ export function UiConfigProvider({ children }: { children: ReactNode }) {
       });
   }, []);
 
-  return (
-    <UiConfigContext.Provider value={{ config, loading, error }}>
-      {children}
-    </UiConfigContext.Provider>
-  );
-}
+  const contextValue: UiConfigContextType = { config, loading, error };
 
-export function useUiConfig() {
-  const context = useContext(UiConfigContext);
-  if (context === undefined) {
-    throw new Error('useUiConfig must be used within UiConfigProvider');
-  }
-  return context;
+  return <UiConfigContext.Provider value={contextValue}>{children}</UiConfigContext.Provider>;
 }

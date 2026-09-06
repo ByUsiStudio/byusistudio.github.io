@@ -1,12 +1,9 @@
-import { createContext, useContext, useMemo, useEffect, ReactNode } from 'react';
+import { useMemo, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import type { Theme } from '../types/ui';
-import { useUiConfig } from './UiConfigContext';
-
-interface ThemeContextType {
-  theme: Theme;
-}
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+import type { ThemeContextType } from '../types/theme';
+import { useUiConfig } from './uiConfig';
+import { ThemeContext } from './theme';
 
 const defaultLightTheme: Theme = {
   'bg-color': '#f8fbff',
@@ -61,17 +58,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     applyThemeToRoot(theme);
   }, [theme]);
 
-  return (
-    <ThemeContext.Provider value={{ theme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
-}
+  const contextValue: ThemeContextType = useMemo(() => ({ theme }), [theme]);
 
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
+  return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;
 }

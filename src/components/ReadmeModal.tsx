@@ -3,6 +3,7 @@ import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.css';
+import { copyToClipboard } from '../utils/clipboard';
 
 interface ReadmeData {
   content: string;
@@ -17,13 +18,23 @@ interface ReadmeModalProps {
   onClose: () => void;
 }
 
-export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose }: ReadmeModalProps) {
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+
+export function ReadmeModal({
+  repoName,
+  repoFullName,
+  repoUrl,
+  onFetch,
+  onClose,
+}: ReadmeModalProps) {
   const [loading, setLoading] = useState(true);
   const [content, setContent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);
   const markdownRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const codeBlocksRef = useRef<{ code: string; lang: string }[]>([]);
   const blobCacheRef = useRef<Map<string, string>>(new Map());
 
@@ -36,32 +47,12 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
 
   const handleCopy = useCallback(async (code: string, index: number) => {
     try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(code);
-      } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = code;
-        textarea.style.position = 'fixed';
-        textarea.style.left = '-9999px';
-        textarea.style.top = '-9999px';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-      }
+      await copyToClipboard(code);
       setCopiedIndex(index);
       setTimeout(() => setCopiedIndex(null), 2000);
     } catch (err) {
       console.error('复制失败:', err);
     }
-  }, []);
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleClose();
-    };
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -72,13 +63,78 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
     }, 500);
   }, [onClose, revokeBlobUrls]);
 
+  // 供一次性挂载的键盘监听读取最新 close 函数，避免重复订阅
+  const handleCloseRef = useRef(handleClose);
+  useEffect(() => {
+    handleCloseRef.current = handleClose;
+  }, [handleClose]);
+
+  // 弹窗生命周期：焦点陷阱、初始聚焦、Esc 关闭、滚动锁定、焦点还原
+  useEffect(() => {
+    const panel = modalRef.current;
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const focusTimer = window.setTimeout(() => {
+      (panel?.querySelector<HTMLElement>('.readme-modal-close') ?? panel)?.focus({
+        preventScroll: true,
+      });
+    }, 0);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleCloseRef.current();
+        return;
+      }
+
+      if (e.key !== 'Tab' || !panel) return;
+
+      const focusables = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+        (el) => !el.hasAttribute('disabled'),
+      );
+
+      if (focusables.length === 0) {
+        e.preventDefault();
+        return;
+      }
+
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (!first || !last) return;
+      const active = document.activeElement as HTMLElement | null;
+      const activeInside = active !== null && panel.contains(active);
+
+      if (e.shiftKey) {
+        if (active === first || !activeInside) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (active === last || !activeInside) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.clearTimeout(focusTimer);
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus({ preventScroll: true });
+    };
+  }, []);
+
   const convertRelativePaths = useCallback((markdown: string, fullName: string): string => {
     const giteeRawBase = `https://gitee.com/${fullName}/raw/master`;
-    
+
     const html = marked(markdown) as string;
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
-    
+
     const convertPath = (path: string): string => {
       if (path.startsWith('http://') || path.startsWith('https://')) {
         return path;
@@ -102,7 +158,7 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
       }
       return `${giteeRawBase}/${cleanPath}`;
     };
-    
+
     const imgs = doc.querySelectorAll('img');
     imgs.forEach((img) => {
       const src = img.getAttribute('src');
@@ -113,7 +169,7 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
         img.classList.add('readme-image');
       }
     });
-    
+
     const links = doc.querySelectorAll('a');
     links.forEach((link) => {
       const href = link.getAttribute('href');
@@ -121,7 +177,7 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
         link.setAttribute('href', convertPath(href));
       }
     });
-    
+
     return doc.body.innerHTML;
   }, []);
 
@@ -134,7 +190,10 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
     onFetch(repoFullName)
       .then((readmeData) => {
         if (!cancelled) {
-          const convertedContent = convertRelativePaths(readmeData.content, readmeData.repoFullName);
+          const convertedContent = convertRelativePaths(
+            readmeData.content,
+            readmeData.repoFullName,
+          );
           setContent(convertedContent);
         }
       })
@@ -165,7 +224,13 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
     });
 
     const fetchAndConvertImages = async () => {
-      const giteePromises: Promise<{ imgEl: HTMLImageElement; originalSrc: string; blobUrl: string | null; success: boolean; fromCache: boolean }>[] = [];
+      const giteePromises: Promise<{
+        imgEl: HTMLImageElement;
+        originalSrc: string;
+        blobUrl: string | null;
+        success: boolean;
+        fromCache: boolean;
+      }>[] = [];
       const nonGiteeImages: HTMLImageElement[] = [];
 
       imgElements.forEach((imgEl) => {
@@ -177,33 +242,35 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
         }
 
         if (originalSrc.includes('gitee.com')) {
-          giteePromises.push((async () => {
-            const cachedUrl = blobCacheRef.current.get(originalSrc);
-            if (cachedUrl) {
-              return { imgEl, originalSrc, blobUrl: cachedUrl, success: true, fromCache: true };
-            }
-
-            try {
-              const response = await fetch(originalSrc, {
-                mode: 'cors',
-                headers: {
-                  'Accept': 'image/*',
-                },
-              });
-              if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+          giteePromises.push(
+            (async () => {
+              const cachedUrl = blobCacheRef.current.get(originalSrc);
+              if (cachedUrl) {
+                return { imgEl, originalSrc, blobUrl: cachedUrl, success: true, fromCache: true };
               }
 
-              const blob = await response.blob();
-              const blobUrl = URL.createObjectURL(blob);
-              blobCacheRef.current.set(originalSrc, blobUrl);
-              
-              return { imgEl, originalSrc, blobUrl, success: true, fromCache: false };
-            } catch (err) {
-              console.error(`[Blob Fetch Failed] ${originalSrc}:`, err);
-              return { imgEl, originalSrc, blobUrl: null, success: false, fromCache: false };
-            }
-          })());
+              try {
+                const response = await fetch(originalSrc, {
+                  mode: 'cors',
+                  headers: {
+                    Accept: 'image/*',
+                  },
+                });
+                if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                blobCacheRef.current.set(originalSrc, blobUrl);
+
+                return { imgEl, originalSrc, blobUrl, success: true, fromCache: false };
+              } catch (err) {
+                console.error(`[Blob Fetch Failed] ${originalSrc}:`, err);
+                return { imgEl, originalSrc, blobUrl: null, success: false, fromCache: false };
+              }
+            })(),
+          );
         } else {
           nonGiteeImages.push(imgEl);
         }
@@ -225,10 +292,10 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
 
       results.forEach((result) => {
         const { imgEl, originalSrc, blobUrl, success } = result;
-        
+
         if (success && blobUrl) {
           imgEl.src = blobUrl;
-          
+
           imgEl.onload = () => {
             imgEl.classList.remove('image-loading');
             imgEl.classList.add('image-loaded');
@@ -279,6 +346,8 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
       if (!existingBtn) {
         const copyBtn = document.createElement('button');
         copyBtn.className = 'copy-btn';
+        copyBtn.type = 'button';
+        copyBtn.setAttribute('aria-label', '复制代码');
         copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
         copyBtn.onclick = () => handleCopy(code, index);
         parentPre.appendChild(copyBtn);
@@ -307,21 +376,36 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
     const sanitized = DOMPurify.sanitize(content, {
       ADD_ATTR: ['data-src'],
     });
-    return <div ref={markdownRef} className="readme-markdown-full" dangerouslySetInnerHTML={{ __html: sanitized }} />;
+    return (
+      <div
+        ref={markdownRef}
+        className="readme-markdown-full"
+        dangerouslySetInnerHTML={{ __html: sanitized }}
+      />
+    );
   }, [content]);
 
   return (
-    <div 
-      className={`readme-modal-overlay ${isClosing ? 'closing' : ''}`} 
-      onClick={handleClose}
-    >
-      <div className={`readme-modal ${isClosing ? 'closing' : ''}`} onClick={(e) => e.stopPropagation()}>
+    <div className={`readme-modal-overlay ${isClosing ? 'closing' : ''}`} onClick={handleClose}>
+      <div
+        ref={modalRef}
+        className={`readme-modal ${isClosing ? 'closing' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${repoName} 的 README 预览`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="readme-modal-header">
           <div className="readme-modal-title">
             <i className="fas fa-file-alt"></i>
             <span>{repoName} - README</span>
           </div>
-          <button className="readme-modal-close" onClick={handleClose}>
+          <button
+            type="button"
+            className="readme-modal-close"
+            onClick={handleClose}
+            aria-label="关闭 README 预览"
+          >
             <i className="fas fa-times"></i>
           </button>
         </div>
@@ -351,7 +435,7 @@ export function ReadmeModal({ repoName, repoFullName, repoUrl, onFetch, onClose 
           <a href={repoUrl} className="readme-modal-link" target="_blank" rel="noopener noreferrer">
             <i className="fas fa-external-link-alt"></i> 在仓库查看
           </a>
-          <button className="readme-modal-close-btn" onClick={handleClose}>
+          <button type="button" className="readme-modal-close-btn" onClick={handleClose}>
             <i className="fas fa-times"></i> 关闭
           </button>
         </div>

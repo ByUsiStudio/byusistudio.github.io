@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { useTheme } from '../context/ThemeContext';
-import { useUiConfig } from '../context/UiConfigContext';
+import { useTheme } from '../context/theme';
+import { useUiConfig } from '../context/uiConfig';
 import type { Repo } from '../types/ui';
 
 interface StatsProps {
@@ -9,14 +9,22 @@ interface StatsProps {
   error: string | null;
 }
 
-function AnimatedNumber({ value, duration = 2000, delay = 0 }: { value: string | number; duration?: number; delay?: number }) {
+function AnimatedNumber({
+  value,
+  duration = 2000,
+  delay = 0,
+}: {
+  value: string | number;
+  duration?: number;
+  delay?: number;
+}) {
   const [displayValue, setDisplayValue] = useState(0);
   const parsedValue = typeof value === 'string' ? parseInt(value.replace(/,/g, ''), 10) : value;
   const hasAnimated = useRef(false);
 
   useEffect(() => {
     if (hasAnimated.current) return;
-    
+
     const timer = setTimeout(() => {
       hasAnimated.current = true;
       let startTime: number | null = null;
@@ -47,11 +55,6 @@ export function Stats({ repos }: StatsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const hasAnimated = useRef(false);
 
-  if (!config) return null;
-
-  const statsConfig = config.layout?.stats;
-  if (!statsConfig) return null;
-
   const totalRepos = repos.length;
   const totalStars = repos.reduce((sum, repo) => sum + repo.stargazers_count, 0);
   const totalForks = repos.reduce((sum, repo) => sum + repo.forks_count, 0);
@@ -77,7 +80,7 @@ export function Stats({ repos }: StatsProps) {
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (containerRef.current) {
@@ -87,18 +90,23 @@ export function Stats({ repos }: StatsProps) {
     return () => observer.disconnect();
   }, []);
 
+  const statsConfig = config?.layout?.stats;
+  if (!config || !statsConfig) return null;
+
   return (
     <section
       id="stats"
       className="section"
-      style={{
-        '--primary': theme.primary,
-        '--accent': theme.accent,
-        '--secondary': theme.secondary,
-        '--dark-gray': theme['dark-gray'],
-        '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
-        '--accent-rgb': theme.accent.replace(/[rgb()]/g, ''),
-      } as React.CSSProperties}
+      style={
+        {
+          '--primary': theme.primary,
+          '--accent': theme.accent,
+          '--secondary': theme.secondary,
+          '--dark-gray': theme['dark-gray'],
+          '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
+          '--accent-rgb': theme.accent.replace(/[rgb()]/g, ''),
+        } as React.CSSProperties
+      }
     >
       <div className="layui-container">
         <div className="stats-glow-bg"></div>

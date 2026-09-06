@@ -1,16 +1,6 @@
-export interface Theme {
-  'bg-color': string;
-  'text-color': string;
-  'primary': string;
-  'primary-dark': string;
-  'secondary': string;
-  'accent': string;
-  'light-gray': string;
-  'dark-gray': string;
-  'card-bg': string;
-  'shadow': string;
-  'transition': string;
-}
+import type { Theme } from './ui';
+
+export type { Theme };
 
 export interface ThemeContextType {
   theme: Theme;

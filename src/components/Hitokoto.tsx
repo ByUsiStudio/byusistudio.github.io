@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useTheme } from '../context/ThemeContext';
-import { useUiConfig } from '../context/UiConfigContext';
+import { useTheme } from '../context/theme';
+import { useUiConfig } from '../context/uiConfig';
 import { fetchHitokoto } from '../services/api';
 import { Typewriter } from './Typewriter';
+import { copyToClipboard } from '../utils/clipboard';
 
 interface HitokotoState {
   hitokoto: string;
@@ -41,7 +42,7 @@ export function Hitokoto() {
   useEffect(() => {
     if (!hitokotoConfig?.show) return;
     loadHitokoto();
-  }, [hitokotoConfig?.show]);
+  }, [hitokotoConfig?.show, loadHitokoto]);
 
   useEffect(() => {
     return () => {
@@ -71,19 +72,7 @@ export function Hitokoto() {
     const text = buildCopyText();
     if (!text) return;
     try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.left = '-9999px';
-        textarea.style.top = '-9999px';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-      }
+      await copyToClipboard(text);
       setCopied(true);
       if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
       copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
@@ -112,12 +101,14 @@ export function Hitokoto() {
   return (
     <section
       className="hitokoto-section"
-      style={{
-        '--primary': theme.primary,
-        '--accent': theme.accent,
-        '--dark-gray': theme['dark-gray'],
-        '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
-      } as React.CSSProperties}
+      style={
+        {
+          '--primary': theme.primary,
+          '--accent': theme.accent,
+          '--dark-gray': theme['dark-gray'],
+          '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
+        } as React.CSSProperties
+      }
     >
       <div className="hitokoto-glow-bg"></div>
       <div className="layui-container">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../context/theme';
 
 export function BackToTop() {
   const { theme } = useTheme();
@@ -26,11 +26,13 @@ export function BackToTop() {
       className={`back-to-top ${isVisible ? 'visible' : ''}`}
       onClick={scrollToTop}
       aria-label="回到顶部"
-      style={{
-        backgroundColor: theme.primary,
-        color: 'white',
-        '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
-      } as React.CSSProperties}
+      style={
+        {
+          backgroundColor: theme.primary,
+          color: 'white',
+          '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
+        } as React.CSSProperties
+      }
     >
       <i className="fas fa-arrow-up"></i>
     </button>

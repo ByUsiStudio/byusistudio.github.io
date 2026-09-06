@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { useTheme } from '../context/ThemeContext';
-import { useUiConfig } from '../context/UiConfigContext';
+import { useTheme } from '../context/theme';
+import { useUiConfig } from '../context/uiConfig';
 
 export function Team() {
   const { theme } = useTheme();
@@ -8,10 +8,7 @@ export function Team() {
   const containerRef = useRef<HTMLDivElement>(null);
   const hasAnimated = useRef(false);
 
-  if (!config) return null;
-
-  const team = config.layout?.team;
-  if (!team) return null;
+  const team = config?.layout?.team;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -23,7 +20,7 @@ export function Team() {
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (containerRef.current) {
@@ -33,29 +30,29 @@ export function Team() {
     return () => observer.disconnect();
   }, []);
 
+  if (!team) return null;
+
   return (
     <section
       id="team"
       className="section"
-      style={{
-        '--primary': theme.primary,
-        '--secondary': theme.secondary,
-        '--accent': theme.accent,
-        '--dark-gray': theme['dark-gray'],
-        '--light-gray': theme['light-gray'],
-        '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
-      } as React.CSSProperties}
+      style={
+        {
+          '--primary': theme.primary,
+          '--secondary': theme.secondary,
+          '--accent': theme.accent,
+          '--dark-gray': theme['dark-gray'],
+          '--light-gray': theme['light-gray'],
+          '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
+        } as React.CSSProperties
+      }
     >
       <div className="layui-container">
         <h2 className="section-title scroll-animate">{team.title}</h2>
         <div className="team-grid-bg"></div>
         <div ref={containerRef} className="team-grid scroll-animate">
           {(team.items || []).map((item, index) => (
-            <div
-              key={index}
-              className="team-card"
-              style={{ animationDelay: `${index * 150}ms` }}
-            >
+            <div key={index} className="team-card" style={{ animationDelay: `${index * 150}ms` }}>
               <div className="team-card-glow"></div>
               <div className="team-card-inner">
                 <div className="team-icon">

@@ -69,6 +69,7 @@ src/
 │   ├── Header.tsx         # 头部导航组件
 │   ├── Hero.tsx           # 首页英雄区域
 │   ├── Hitokoto.tsx       # 一言展示组件
+│   ├── Layout.tsx         # 页面布局编排（各模块显隐）
 │   ├── MouseFollower.tsx  # 鼠标跟随光标
 │   ├── Projects.tsx       # 项目列表组件
 │   ├── ReadmeModal.tsx    # README 预览弹窗
@@ -78,28 +79,39 @@ src/
 │   ├── Team.tsx           # 团队/功能展示组件
 │   └── Typewriter.tsx     # 打字机效果组件
 ├── context/               # Context 状态管理
-│   ├── ThemeContext.tsx   # 主题上下文
-│   └── UiConfigContext.tsx # UI 配置上下文
+│   ├── ThemeContext.tsx   # 主题 Provider（注入 CSS 变量）
+│   ├── theme.ts           # 主题 Context 与 useTheme Hook
+│   ├── UiConfigContext.tsx# UI 配置 Provider（加载 ui.json）
+│   └── uiConfig.ts        # UI 配置 Context 与 useUiConfig Hook
 ├── data/                  # 数据文件
 │   └── mockRepos.ts       # 模拟仓库数据
 ├── hooks/                 # 自定义 Hooks
 │   ├── useCookieRecord.ts # Cookie 记录 Hook
 │   ├── useLocalStorage.ts # 本地存储 Hook
 │   ├── useScrollAnimation.ts # 滚动动画 Hook
-│   └── useRecentRepos.ts   # 最近访问仓库 Hook
+│   └── useRecentRepos.ts  # 最近访问仓库 Hook
 ├── services/              # 服务层
-│   ├── api.ts             # API 请求（仓库/README/一言）
-│   └── config.ts          # 配置加载
+│   ├── api.ts             # API 请求（仓库/README/一言，含缓存）
+│   └── config.ts          # 运行时配置加载
 ├── types/                 # TypeScript 类型定义
-│   └── ui.ts              # UI 相关类型
+│   ├── theme.ts           # 主题类型
+│   ├── ui.ts              # UI 配置与仓库类型
+│   └── jcupupw.d.ts       # JCuPupw 弹窗库类型声明
+├── utils/                 # 通用工具
+│   ├── clipboard.ts       # 剪贴板复制（Clipboard API + 降级方案）
+│   └── relativeTime.ts    # 相对时间文案
 ├── App.less               # 全局样式（Less）
 ├── App.tsx                # 主应用组件
+├── noJsWarning.less       # 无 JS 提示页样式源（编译至 public）
 └── main.tsx               # 入口文件
 
 public/                    # 静态资源（运行时配置）
 ├── config.json            # API 配置（baseUrl/orgName）
 ├── ui.json                # UI 配置（布局/主题/导航等）
 ├── error.html             # 错误页面
+├── no-js-warning.css      # 无 JS 提示样式（lessc 编译产物）
+├── js/jcupupw.umd.js      # JCuPupw 弹窗库
+├── favicon.png / logo/    # 站点图标与 Logo
 └── Font/                  # FontAwesome 图标库
 ```
 
@@ -136,19 +148,19 @@ Gitee API 访问配置：
 
 项目包含多种高级 CSS 动画效果（统一在 App.less 中管理）：
 
-| 动画名称 | 效果描述 |
-|---------|---------|
-| `spring` | 弹簧弹性振动效果 |
-| `wave` | 波浪起伏效果 |
-| `scanLine` / `hitokotoScanMove` | 扫描线移动效果 |
-| `breathe` / `hitokotoRingBreathe` | 呼吸缩放效果 |
-| `pulseGlow` / `hitokotoIconBreathe` | 脉冲发光效果 |
-| `glowRing` | 发光圆环缩放动画 |
-| `slideScaleIn` / `hitokotoCardIn` | 滑动+缩放组合进入 |
-| `floatRandom` | 随机漂浮移动 |
-| `checkPulse` | 复制成功弹性反馈 |
-| `loadingGlow` | 加载旋转器呼吸光晕 |
-| `hitokotoDotWave` | 加载点波浪起伏 |
+| 动画名称                            | 效果描述           |
+| ----------------------------------- | ------------------ |
+| `spring`                            | 弹簧弹性振动效果   |
+| `wave`                              | 波浪起伏效果       |
+| `scanLine` / `hitokotoScanMove`     | 扫描线移动效果     |
+| `breathe` / `hitokotoRingBreathe`   | 呼吸缩放效果       |
+| `pulseGlow` / `hitokotoIconBreathe` | 脉冲发光效果       |
+| `glowRing`                          | 发光圆环缩放动画   |
+| `slideScaleIn` / `hitokotoCardIn`   | 滑动+缩放组合进入  |
+| `floatRandom`                       | 随机漂浮移动       |
+| `checkPulse`                        | 复制成功弹性反馈   |
+| `loadingGlow`                       | 加载旋转器呼吸光晕 |
+| `hitokotoDotWave`                   | 加载点波浪起伏     |
 
 ## 浏览器支持
 
