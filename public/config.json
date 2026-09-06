@@ -10,6 +10,12 @@
     "orgName": "byusistudio",
     "cacheLifetime": 3600
   },
+  "beian": {
+    "icpText": "",
+    "icpUrl": "https://beian.miit.gov.cn/",
+    "policeText": "",
+    "policeUrl": "http://www.beian.gov.cn/portal/registerSystemInfo?recordcode="
+  },
   "pagination": {
     "itemsPerPage": 10
   },
