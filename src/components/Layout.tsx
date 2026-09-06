@@ -4,6 +4,7 @@ import { Header } from './Header';
 import { Hero } from './Hero';
 import { Stats } from './Stats';
 import { Projects } from './Projects';
+import { GithubProjects } from './GithubProjects';
 import { ActivityFeed } from './ActivityFeed';
 import { Team } from './Team';
 import { Hitokoto } from './Hitokoto';
@@ -25,9 +26,25 @@ interface LayoutProps {
   reposLoading: boolean;
   reposError: string | null;
   onRetryRepos: () => void;
+  githubEnabled: boolean;
+  githubRepos: Repo[];
+  githubLoading: boolean;
+  githubError: string | null;
+  onRetryGithub: () => void;
 }
 
-export function Layout({ config, repos, reposLoading, reposError, onRetryRepos }: LayoutProps) {
+export function Layout({
+  config,
+  repos,
+  reposLoading,
+  reposError,
+  onRetryRepos,
+  githubEnabled,
+  githubRepos,
+  githubLoading,
+  githubError,
+  onRetryGithub,
+}: LayoutProps) {
   const layout = config.layout ?? {};
   const navbar = layout.navbar ?? { sticky: false };
   const hero = layout.hero ?? { show: false };
@@ -74,6 +91,14 @@ export function Layout({ config, repos, reposLoading, reposError, onRetryRepos }
           removeRecent={removeRecent}
           clearRecent={clearRecent}
           onOpenReadme={openReadme}
+        />
+      )}
+      {githubEnabled && (
+        <GithubProjects
+          repos={githubRepos}
+          loading={githubLoading}
+          error={githubError}
+          onRetry={onRetryGithub}
         />
       )}
       {activity.show && <ActivityFeed repos={repos} onOpen={openReadme} />}

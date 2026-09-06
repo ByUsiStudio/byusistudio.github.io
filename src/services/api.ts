@@ -1,5 +1,6 @@
 import type { Repo } from '../types/ui';
 import { loadApiConfig } from './config';
+import type { GithubConfig } from './config';
 
 interface CacheData {
   data: Repo[];
@@ -7,13 +8,14 @@ interface CacheData {
 }
 
 const CACHE_KEY = 'byusi_repos_cache';
+const GITHUB_CACHE_KEY = 'byusi_github_repos_cache';
 const README_CACHE_KEY_PREFIX = 'byusi_readme_cache_';
 // README 本地缓存条目数上限（超出后按写入时间淘汰最旧条目，防止 localStorage 膨胀）
 const MAX_README_CACHE = 30;
 
-function getCache(cacheLifetime: number): Repo[] | null {
+function getCache(cacheKey: string, cacheLifetime: number): Repo[] | null {
   try {
-    const raw = localStorage.getItem(CACHE_KEY);
+    const raw = localStorage.getItem(cacheKey);
     if (!raw) return null;
     const cache: CacheData = JSON.parse(raw);
     if (Date.now() - cache.timestamp > cacheLifetime) return null;
@@ -23,15 +25,16 @@ function getCache(cacheLifetime: number): Repo[] | null {
   }
 }
 
-function setCache(data: Repo[]) {
+function setCache(cacheKey: string, data: Repo[]) {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+    localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
   } catch {
     // storage might be full
   }
 }
 
-interface GiteeRepoRaw {
+// 仓库原始结构（Gitee v5 与 GitHub REST 字段兼容，可直接复用）
+interface RepoApiRaw {
   id: number;
   name: string;
   full_name: string;
@@ -47,6 +50,24 @@ interface GiteeRepoRaw {
   open_issues_count?: number;
 }
 
+function mapRepoRaw(repo: RepoApiRaw): Repo {
+  return {
+    id: repo.id,
+    name: repo.name,
+    full_name: repo.full_name,
+    description: repo.description || '',
+    html_url: repo.html_url,
+    language: repo.language,
+    stargazers_count: repo.stargazers_count || 0,
+    forks_count: repo.forks_count || 0,
+    updated_at: repo.updated_at,
+    created_at: repo.created_at || '',
+    archived: repo.archived || false,
+    has_issues: repo.has_issues || false,
+    open_issues_count: repo.open_issues_count || 0,
+  };
+}
+
 // ---- 请求重试与错误分类 ----
 const REPO_PAGE_SIZE = 100;
 const MAX_REPO_PAGES = 10; // 单次最多拉取 1000 个仓库
@@ -59,8 +80,8 @@ function delayMs(ms: number): Promise<void> {
 }
 
 function describeHttpStatus(status: number): string {
-  if (status === 401 || status === 403) return 'Gitee 拒绝了请求（权限或凭据不足）';
-  if (status === 404) return '请求的资源不存在';
+  if (status === 401 || status === 403) return '接口拒绝了请求（权限或凭据不足）';
+  if (status === 404) return '请求的资源不存在，请检查组织名配置';
   if (status === 429) return '请求过于频繁（被接口限流），请稍后重试';
   if (status >= 500) return '接口服务器暂时不可用，请稍后重试';
   return `接口请求失败（HTTP ${status}）`;
@@ -79,10 +100,11 @@ function parseRetryAfter(value: string | null): number | null {
 }
 
 /**
- * 带退避重试的 Gitee fetch：网络错误与 429/5xx 会重试至多 MAX_RETRY_ATTEMPTS 次，
+ * 带退避重试的通用 API fetch（Gitee / GitHub 共用）：
+ * 网络错误与 429/5xx 会重试至多 MAX_RETRY_ATTEMPTS 次，
  * 最终失败抛出带用户可读文案的错误。
  */
-async function giteeFetchWithRetry(url: string, init?: RequestInit): Promise<Response> {
+async function apiFetchWithRetry(url: string, init?: RequestInit): Promise<Response> {
   for (let attempt = 1; ; attempt++) {
     let response: Response;
     try {
@@ -112,7 +134,7 @@ export async function fetchRepos(): Promise<Repo[]> {
   const config = await loadApiConfig();
   const CACHE_LIFETIME = config.api.cacheLifetime * 1000;
 
-  const cached = getCache(CACHE_LIFETIME);
+  const cached = getCache(CACHE_KEY, CACHE_LIFETIME);
   if (cached) return cached;
 
   const { baseUrl, orgName } = config.api;
@@ -123,39 +145,25 @@ export async function fetchRepos(): Promise<Repo[]> {
 
   try {
     // 分页拉取组织全部仓库（每页 100），直到拿满或达到页数上限
-    const rawRepos: GiteeRepoRaw[] = [];
+    const rawRepos: RepoApiRaw[] = [];
     for (let page = 1; page <= MAX_REPO_PAGES; page++) {
       const url = `${baseUrl}/orgs/${orgName}/repos?type=all&page=${page}&per_page=${REPO_PAGE_SIZE}`;
-      const data = (await (await giteeFetchWithRetry(url, { headers })).json()) as GiteeRepoRaw[];
+      const data = (await (await apiFetchWithRetry(url, { headers })).json()) as RepoApiRaw[];
       rawRepos.push(...data);
       if (data.length < REPO_PAGE_SIZE) break;
     }
 
     // 按 id 去重（防御接口异常），再统一映射
-    const uniqueById = new Map<number, GiteeRepoRaw>();
+    const uniqueById = new Map<number, RepoApiRaw>();
     rawRepos.forEach((repo) => {
       if (repo && typeof repo.id === 'number') uniqueById.set(repo.id, repo);
     });
 
-    const repos: Repo[] = [...uniqueById.values()].map((repo) => ({
-      id: repo.id,
-      name: repo.name,
-      full_name: repo.full_name,
-      description: repo.description || '',
-      html_url: repo.html_url,
-      language: repo.language,
-      stargazers_count: repo.stargazers_count || 0,
-      forks_count: repo.forks_count || 0,
-      updated_at: repo.updated_at,
-      created_at: repo.created_at || '',
-      archived: repo.archived || false,
-      has_issues: repo.has_issues || false,
-      open_issues_count: repo.open_issues_count || 0,
-    }));
+    const repos: Repo[] = [...uniqueById.values()].map(mapRepoRaw);
 
     repos.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
-    setCache(repos);
+    setCache(CACHE_KEY, repos);
     return repos;
   } catch (error) {
     console.error('Failed to fetch repos:', error);
@@ -166,6 +174,57 @@ export async function fetchRepos(): Promise<Repo[]> {
       // ignore
     }
     throw error instanceof Error ? error : new Error('加载仓库数据失败，请稍后重试');
+  }
+}
+
+const GITHUB_DEFAULT_CACHE_LIFETIME_SEC = 3600;
+
+/**
+ * 拉取 GitHub 组织的公开仓库（返回与 Gitee 相同的 Repo 结构）。
+ * 需要先在 config.json 的 github 中启用并配置 orgName，由调用方传入配置。
+ */
+export async function fetchGithubRepos(github: GithubConfig): Promise<Repo[]> {
+  const cacheLifetimeMs = (github.cacheLifetime ?? GITHUB_DEFAULT_CACHE_LIFETIME_SEC) * 1000;
+  const cached = getCache(GITHUB_CACHE_KEY, cacheLifetimeMs);
+  if (cached) return cached;
+
+  const baseUrl = (github.baseUrl || 'https://api.github.com').replace(/\/+$/, '');
+  const orgName = github.orgName.trim();
+  if (!orgName) throw new Error('GitHub 组织名未配置，请在 config.json 中填写 github.orgName');
+
+  const headers = {
+    'User-Agent': 'ByUsi-GitHub-Fetcher/1.0',
+    Accept: 'application/vnd.github+json',
+  };
+
+  try {
+    const rawRepos: RepoApiRaw[] = [];
+    for (let page = 1; page <= MAX_REPO_PAGES; page++) {
+      const url = `${baseUrl}/orgs/${orgName}/repos?type=all&page=${page}&per_page=${REPO_PAGE_SIZE}`;
+      const data = (await (await apiFetchWithRetry(url, { headers })).json()) as RepoApiRaw[];
+      rawRepos.push(...data);
+      if (data.length < REPO_PAGE_SIZE) break;
+    }
+
+    const uniqueById = new Map<number, RepoApiRaw>();
+    rawRepos.forEach((repo) => {
+      if (repo && typeof repo.id === 'number') uniqueById.set(repo.id, repo);
+    });
+
+    const repos: Repo[] = [...uniqueById.values()].map(mapRepoRaw);
+    repos.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+
+    setCache(GITHUB_CACHE_KEY, repos);
+    return repos;
+  } catch (error) {
+    console.error('Failed to fetch GitHub repos:', error);
+    try {
+      const raw = localStorage.getItem(GITHUB_CACHE_KEY);
+      if (raw) return (JSON.parse(raw) as CacheData).data;
+    } catch {
+      // ignore
+    }
+    throw error instanceof Error ? error : new Error('加载 GitHub 项目失败，请稍后重试');
   }
 }
 
@@ -283,7 +342,7 @@ export async function fetchReadme(repoFullName: string): Promise<ReadmeData> {
   const url = `${baseUrl}/repos/${repoFullName}/readme`;
 
   try {
-    const response = await giteeFetchWithRetry(url, {
+    const response = await apiFetchWithRetry(url, {
       headers: {
         'User-Agent': 'ByUsi-Readme-Fetcher/1.0',
         Accept: 'application/json',

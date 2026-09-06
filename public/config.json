@@ -4,6 +4,12 @@
     "orgName": "byusistudio",
     "cacheLifetime": 3600
   },
+  "github": {
+    "enabled": false,
+    "baseUrl": "https://api.github.com",
+    "orgName": "byusistudio",
+    "cacheLifetime": 3600
+  },
   "pagination": {
     "itemsPerPage": 10
   },
