@@ -45,7 +45,7 @@
         { "href": "#home", "icon": "fas fa-home", "label": "首页" },
         { "href": "https://gitee.com/byusistudio/docs", "icon": "fas fa-book", "label": "文档", "external": true},
         { "href": "https://moebun.com/aff/EBBZFNWQ", "icon": "fas fa-cloud", "label": "小兔互联", "external": true },
-        { "href": "https://server.cdifit.cn", "icon": "fas fa-bolt", "label": "ByUsi Studio服务器监控", "external": true }
+        { "href": "https://server.cdifit.com/status/pub", "icon": "fas fa-bolt", "label": "ByUsi Studio服务器监控", "external": true }
       ]
     },
     "hero": {
@@ -56,7 +56,7 @@
         { "label": "查看项目", "icon": "fas fa-rocket", "action": "scrollToProjects", "primary": true },
         { "label": "访问仓库", "icon": "fab fa-git-alt", "href": "https://gitee.com/byusistudio", "primary": false },
         { "label": "小兔互联", "icon": "fas fa-cloud", "href": "https://moebun.com/aff/EBBZFNWQ", "external": true, "primary": true },
-        { "label": "ByUsi Studio服务器监控", "icon": "fas fa-bolt", "href": "https://server.cdifit.cn", "external": true, "primary": false }
+        { "label": "ByUsi Studio服务器监控", "icon": "fas fa-bolt", "href": "https://server.cdifit.com/status/pub", "external": true, "primary": false }
       ]
     },
     "stats": {
@@ -118,7 +118,8 @@
         {
           "title": "资源链接",
           "links": [
-            { "label": "Cdifit 云盘", "href": "https://cdifit.com/", "external": true }
+            { "label": "Cdifit 云盘", "href": "https://cdifit.com/", "external": true },
+            { "label": "Cdifit Public Resource Center", "href": "https://openlist.cdifit.cn", "external": true }
           ]
         },
         {
@@ -126,6 +127,18 @@
           "links": [
             { "label": "To Be Riftinued", "href": "https://tbr.yavgame.com", "external": true },
             { "label": "NotiLenti", "href": "https://notilenti.yavgame.com", "external": true }
+          ]
+        },
+        {
+          "title": "ByUsi Game",
+          "links": [
+            { "label": "《异化》系列", "href": "https://yh.byusistudio.fun", "external": true }
+          ]
+        },
+        {
+          "title": "《异化》系列",
+          "links": [
+            { "label": "异化：空的哀伤", "href": "https://yh.byusistudio.fun/kdas.html", "external": true }
           ]
         },
         {
@@ -145,7 +158,8 @@
         {
           "title": "资助我们",
           "links": [
-            { "label": "点击本链接获取赞助码", "href": "/wx_zzm.png", "external": true }
+            { "label": "点击本链接获取赞助码", "href": "/wx_zzm.png", "external": true },
+            { "label": "群主女装照大全", "href": "https://www.bilibili.com/video/BV1GJ411x7h7", "external": true }
           ]
         }
       ]
