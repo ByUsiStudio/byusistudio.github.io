@@ -59,6 +59,26 @@ async function fetchImageBlobUrl(src: string): Promise<string> {
   return blobUrl;
 }
 
+// ---- 页面滚动锁定（引用计数） ----
+// 以计数方式管理 body 滚动锁定：每个弹窗实例挂载时 +1、卸载时 -1，
+// 只有计数归零才真正恢复滚动。相比“保存/还原旧值”的快照方式，
+// 可避免多弹窗叠加或重挂载时快照错位导致“关闭后页面仍被锁定”。
+let bodyScrollLockCount = 0;
+
+function applyBodyScrollLock() {
+  document.body.style.overflow = bodyScrollLockCount > 0 ? 'hidden' : '';
+}
+
+function lockBodyScroll() {
+  bodyScrollLockCount += 1;
+  applyBodyScrollLock();
+}
+
+function unlockBodyScroll() {
+  bodyScrollLockCount = Math.max(0, bodyScrollLockCount - 1);
+  applyBodyScrollLock();
+}
+
 // ---- README 清洗策略 ----
 // 在 DOMPurify 默认（去脚本/事件/危险协议）基础上放行 README 中常见的
 // 排版 HTML 与属性（details/居中/表格对齐/行内样式等），保持相对安全的底线。
@@ -163,8 +183,7 @@ export function ReadmeModal({
     const panel = modalRef.current;
     const previouslyFocused =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    lockBodyScroll();
 
     bindPageHideCleanup();
 
@@ -214,7 +233,7 @@ export function ReadmeModal({
     return () => {
       window.clearTimeout(focusTimer);
       window.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = previousOverflow;
+      unlockBodyScroll();
       previouslyFocused?.focus({ preventScroll: true });
     };
   }, []);
