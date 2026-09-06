@@ -1,4 +1,7 @@
+import { useState, useEffect } from 'react';
 import { useUiConfig } from '../context/uiConfig';
+import { loadBeianConfig } from '../services/config';
+import type { BeianDisplay } from '../services/config';
 import type { Repo } from '../types/ui';
 
 interface FooterProps {
@@ -7,6 +10,20 @@ interface FooterProps {
 
 export function Footer({ repos }: FooterProps) {
   const { config } = useUiConfig();
+  const [beian, setBeian] = useState<BeianDisplay | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadBeianConfig()
+      .then((value) => {
+        if (!cancelled) setBeian(value);
+      })
+      .catch(() => {
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (!config) return null;
 
@@ -57,6 +74,27 @@ export function Footer({ repos }: FooterProps) {
           <p>
             {footer.copyright}. {repos.length}个开源项目 | {footer.subtitle}
           </p>
+          {beian && (beian.icpText || beian.policeText) && (
+            <div className="footer-beian">
+              {beian.icpText &&
+                (beian.icpUrl ? (
+                  <a href={beian.icpUrl} target="_blank" rel="noopener noreferrer">
+                    {beian.icpText}
+                  </a>
+                ) : (
+                  <span>{beian.icpText}</span>
+                ))}
+              {beian.icpText && beian.policeText && <span className="footer-beian-sep">|</span>}
+              {beian.policeText &&
+                (beian.policeUrl ? (
+                  <a href={beian.policeUrl} target="_blank" rel="noopener noreferrer">
+                    {beian.policeText}
+                  </a>
+                ) : (
+                  <span>{beian.policeText}</span>
+                ))}
+            </div>
+          )}
         </div>
       </div>
     </footer>
