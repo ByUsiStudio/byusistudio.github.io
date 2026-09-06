@@ -137,9 +137,7 @@ export function GithubProjects({ repos, loading, error, onRetry }: GithubProject
                             {repo.name}
                           </a>
                           {repo.archived && <span className="project-badge archived">归档</span>}
-                          {repo.language && (
-                            <span className="project-badge">{repo.language}</span>
-                          )}
+                          {repo.language && <span className="project-badge">{repo.language}</span>}
                         </div>
                         <div className="project-description">
                           {repo.description || '该项目暂无描述信息'}
