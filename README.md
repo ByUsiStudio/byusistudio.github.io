@@ -152,6 +152,26 @@ Gitee API 访问配置：
 
 > 注意：GitHub 匿名接口限流约 60 次/小时，本项目已用本地缓存缓解。
 
+### ICP / 网安备案（public/config.json）
+
+若站点部署于中国大陆并已取得备案，可在页脚底部展示备案信息
+（未配置或全部留空则不显示）：
+
+- `beian.icpText` - ICP 备案号，如 `京ICP备XXXXXXX号-1`
+- `beian.icpUrl` - ICP 查询链接（默认 `https://beian.miit.gov.cn/`）
+- `beian.policeText` - 公安（网安）备案号，如 `京公网安备 110XXXXXXXXXXXXX号`
+- `beian.policeUrl` - 公安备案查询链接；留空时若备案号含编号会自动拼
+  `http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=<编号>`
+
+示例：
+
+```json
+"beian": {
+  "icpText": "京ICP备2024000000号-1",
+  "policeText": "京公网安备11010000000000号"
+}
+```
+
 > ⚠️ **不要在此处配置任何 access token**。本站所有接口均访问 Gitee 公开仓库资源，
 > 无需鉴权；由于前端代码和 `public/` 静态文件对访问者可见，任何放在这里的
 > token 都会直接泄露。如需访问私有数据，请改走后端代理。
