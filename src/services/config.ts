@@ -16,7 +16,7 @@ let apiConfigCache: Config | null = null;
 
 export async function loadUiConfig(): Promise<UiConfig> {
   if (uiConfigCache) return uiConfigCache;
-  
+
   const response = await fetch('/ui.json');
   if (!response.ok) {
     throw new Error(`Failed to load ui.json: ${response.status}`);
@@ -28,7 +28,7 @@ export async function loadUiConfig(): Promise<UiConfig> {
 
 export async function loadApiConfig(): Promise<Config> {
   if (apiConfigCache) return apiConfigCache;
-  
+
   const response = await fetch('/config.json');
   if (!response.ok) {
     throw new Error(`Failed to load config.json: ${response.status}`);

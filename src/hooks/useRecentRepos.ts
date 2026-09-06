@@ -14,16 +14,22 @@ export type RecentReposApi = {
 export function useRecentRepos(): RecentReposApi {
   const [recentIds, setRecentIds] = useLocalStorage<string[]>(RECENT_KEY, []);
 
-  const recordRecent = useCallback((repoFullName: string) => {
-    setRecentIds((prev) => {
-      const filtered = (prev || []).filter((id) => id !== repoFullName);
-      return [repoFullName, ...filtered].slice(0, MAX_RECENT);
-    });
-  }, [setRecentIds]);
+  const recordRecent = useCallback(
+    (repoFullName: string) => {
+      setRecentIds((prev) => {
+        const filtered = (prev || []).filter((id) => id !== repoFullName);
+        return [repoFullName, ...filtered].slice(0, MAX_RECENT);
+      });
+    },
+    [setRecentIds],
+  );
 
-  const removeRecent = useCallback((repoFullName: string) => {
-    setRecentIds((prev) => (prev || []).filter((id) => id !== repoFullName));
-  }, [setRecentIds]);
+  const removeRecent = useCallback(
+    (repoFullName: string) => {
+      setRecentIds((prev) => (prev || []).filter((id) => id !== repoFullName));
+    },
+    [setRecentIds],
+  );
 
   const clearRecent = useCallback(() => {
     setRecentIds([]);

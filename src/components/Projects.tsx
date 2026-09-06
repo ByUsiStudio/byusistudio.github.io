@@ -1,10 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTheme } from '../context/theme';
 import { useUiConfig } from '../context/uiConfig';
-import { ReadmeModal } from './ReadmeModal';
 import { RecentRepos } from './RecentRepos';
-import { fetchReadme } from '../services/api';
-import { useRecentRepos } from '../hooks/useRecentRepos';
 import { relativeTimeText } from '../utils/relativeTime';
 import type { Repo, ProjectLayoutMode } from '../types/ui';
 
@@ -14,19 +11,30 @@ interface ProjectsProps {
   repos: Repo[];
   loading: boolean;
   error: string | null;
+  onRetry: () => void;
+  recentIds: string[];
+  removeRecent: (repoFullName: string) => void;
+  clearRecent: () => void;
+  onOpenReadme: (repo: Repo) => void;
 }
 
-export function Projects({ repos, loading, error }: ProjectsProps) {
+export function Projects({
+  repos,
+  loading,
+  error,
+  onRetry,
+  recentIds,
+  removeRecent,
+  clearRecent,
+  onOpenReadme,
+}: ProjectsProps) {
   const { theme } = useTheme();
   const { config } = useUiConfig();
-  const { recentIds, recordRecent, removeRecent, clearRecent } = useRecentRepos();
   const containerRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState<FilterType>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [animateKey, setAnimateKey] = useState(0);
-  const [selectedRepo, setSelectedRepo] = useState<Repo | null>(null);
-  const [modalOpenTime, setModalOpenTime] = useState<number>(0);
   const [layoutMode, setLayoutMode] = useState<ProjectLayoutMode>('auto');
   const [isLargeScreen, setIsLargeScreen] = useState(false);
   const [layoutSwitching, setLayoutSwitching] = useState(false);
@@ -56,15 +64,6 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
     setAnimateKey((prev) => prev + 1);
   }, [filter, searchTerm]);
 
-  const handleOpenModal = useCallback(
-    (repo: Repo) => {
-      recordRecent(repo.full_name);
-      setModalOpenTime(Date.now());
-      setSelectedRepo(repo);
-    },
-    [recordRecent],
-  );
-
   const handleLayoutChange = useCallback(
     (mode: ProjectLayoutMode) => {
       if (mode === layoutMode || layoutSwitching) return;
@@ -84,7 +83,6 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
   const handlePreviewProject = useCallback(
     (repo: Repo) => {
       if (typeof JCuPupw === 'undefined') return;
-      recordRecent(repo.full_name);
 
       const starCount = repo.stargazers_count.toLocaleString();
       const forkCount = repo.forks_count.toLocaleString();
@@ -135,7 +133,7 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
           text: '查看 README',
           type: 'primary',
           close: true,
-          action: () => handleOpenModal(repo),
+          action: () => onOpenReadme(repo),
         },
         {
           text: '访问仓库',
@@ -172,7 +170,7 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
         },
       });
     },
-    [handleOpenModal, recordRecent],
+    [onOpenReadme],
   );
 
   const projectsConfig = config?.layout?.projects;
@@ -279,8 +277,13 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
           <h2 className="section-title">{projectsConfig.title}</h2>
           <div className="empty-state">
             <i className="fas fa-exclamation-triangle"></i>
-            <h3>数据加载失败</h3>
+            <h3>项目数据加载失败</h3>
             <p>{error}</p>
+            {onRetry && (
+              <button type="button" className="notice-retry-btn" onClick={onRetry}>
+                <i className="fas fa-redo"></i> 重新加载
+              </button>
+            )}
           </div>
         </div>
       </section>
@@ -288,220 +291,202 @@ export function Projects({ repos, loading, error }: ProjectsProps) {
   }
 
   return (
-    <>
-      <section
-        id="projects"
-        className="section"
-        style={
-          {
-            '--primary': theme.primary,
-            '--secondary': theme.secondary,
-            '--accent': theme.accent,
-            '--dark-gray': theme['dark-gray'],
-            '--text-color': theme['text-color'],
-            '--card-bg': theme['card-bg'],
-            '--border-color': theme['border-color'],
-            '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
-            '--accent-rgb': theme.accent.replace(/[rgb()]/g, ''),
-          } as React.CSSProperties
-        }
-      >
-        <div className="layui-container">
-          <RecentRepos
-            recentIds={recentIds}
-            repos={repos}
-            onOpen={handleOpenModal}
-            onRemove={removeRecent}
-            onClear={clearRecent}
+    <section
+      id="projects"
+      className="section"
+      style={
+        {
+          '--primary': theme.primary,
+          '--secondary': theme.secondary,
+          '--accent': theme.accent,
+          '--dark-gray': theme['dark-gray'],
+          '--text-color': theme['text-color'],
+          '--card-bg': theme['card-bg'],
+          '--border-color': theme['border-color'],
+          '--primary-rgb': theme.primary.replace(/[rgb()]/g, ''),
+          '--accent-rgb': theme.accent.replace(/[rgb()]/g, ''),
+        } as React.CSSProperties
+      }
+    >
+      <div className="layui-container">
+        <RecentRepos
+          recentIds={recentIds}
+          repos={repos}
+          onOpen={onOpenReadme}
+          onRemove={removeRecent}
+          onClear={clearRecent}
+        />
+
+        <h2 className="section-title">{projectsConfig.title}</h2>
+
+        <div className="project-search">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder={projectsConfig.searchPlaceholder}
           />
+          <i className="fas fa-search search-icon"></i>
+        </div>
 
-          <h2 className="section-title">{projectsConfig.title}</h2>
-
-          <div className="project-search">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              placeholder={projectsConfig.searchPlaceholder}
-            />
-            <i className="fas fa-search search-icon"></i>
+        <div className="project-toolbar">
+          <div className="project-filters">
+            {(projectsConfig.filters || []).map(({ key, label }) => (
+              <button
+                key={key}
+                className={`filter-btn ${filter === key ? 'active' : ''}`}
+                onClick={() => {
+                  setFilter(key as FilterType);
+                  setCurrentPage(1);
+                }}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
-          <div className="project-toolbar">
-            <div className="project-filters">
-              {(projectsConfig.filters || []).map(({ key, label }) => (
-                <button
-                  key={key}
-                  className={`filter-btn ${filter === key ? 'active' : ''}`}
-                  onClick={() => {
-                    setFilter(key as FilterType);
-                    setCurrentPage(1);
-                  }}
+          <div className="layout-switcher">
+            <span className="layout-switcher-label">布局:</span>
+            <button
+              className={`layout-btn ${layoutMode === 'single' ? 'active' : ''}`}
+              onClick={() => handleLayoutChange('single')}
+              title="单列布局"
+            >
+              <i className="fas fa-list"></i>
+            </button>
+            <button
+              className={`layout-btn ${layoutMode === 'auto' ? 'active' : ''}`}
+              onClick={() => handleLayoutChange('auto')}
+              title="自动布局"
+            >
+              <i className="fas fa-desktop"></i>
+            </button>
+            <button
+              className={`layout-btn ${layoutMode === 'double' ? 'active' : ''}`}
+              onClick={() => handleLayoutChange('double')}
+              title="双列布局"
+            >
+              <i className="fas fa-th-large"></i>
+            </button>
+          </div>
+        </div>
+
+        {filteredRepos.length === 0 ? (
+          <div className="empty-state">
+            <i className="fas fa-search"></i>
+            <h3>未找到匹配的项目</h3>
+            <p>尝试使用其他搜索词或筛选条件</p>
+          </div>
+        ) : (
+          <>
+            <div
+              ref={containerRef}
+              className={`project-list ${isDoubleColumn ? 'double-column' : ''} ${layoutSwitching ? 'is-switching' : ''}`}
+            >
+              {paginatedRepos.map((repo, index) => (
+                <div
+                  key={`${repo.id}-${animateKey}`}
+                  className="project-item"
+                  style={{ animationDelay: `${index * 80}ms` }}
                 >
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            <div className="layout-switcher">
-              <span className="layout-switcher-label">布局:</span>
-              <button
-                className={`layout-btn ${layoutMode === 'single' ? 'active' : ''}`}
-                onClick={() => handleLayoutChange('single')}
-                title="单列布局"
-              >
-                <i className="fas fa-list"></i>
-              </button>
-              <button
-                className={`layout-btn ${layoutMode === 'auto' ? 'active' : ''}`}
-                onClick={() => handleLayoutChange('auto')}
-                title="自动布局"
-              >
-                <i className="fas fa-desktop"></i>
-              </button>
-              <button
-                className={`layout-btn ${layoutMode === 'double' ? 'active' : ''}`}
-                onClick={() => handleLayoutChange('double')}
-                title="双列布局"
-              >
-                <i className="fas fa-th-large"></i>
-              </button>
-            </div>
-          </div>
-
-          {filteredRepos.length === 0 ? (
-            <div className="empty-state">
-              <i className="fas fa-search"></i>
-              <h3>未找到匹配的项目</h3>
-              <p>尝试使用其他搜索词或筛选条件</p>
-            </div>
-          ) : (
-            <>
-              <div
-                ref={containerRef}
-                className={`project-list ${isDoubleColumn ? 'double-column' : ''} ${layoutSwitching ? 'is-switching' : ''}`}
-              >
-                {paginatedRepos.map((repo, index) => (
-                  <div
-                    key={`${repo.id}-${animateKey}`}
-                    className="project-item"
-                    style={{ animationDelay: `${index * 80}ms` }}
-                  >
-                    <div className="project-glow-border"></div>
-                    <div className="project-item-inner">
-                      <div className="project-item-header">
-                        <div className="project-info">
-                          <div className="project-name">
-                            <a href={repo.html_url} target="_blank" rel="noopener noreferrer">
-                              {repo.name}
-                            </a>
-                            {repo.archived && <span className="project-badge archived">归档</span>}
-                            {repo.language && (
-                              <span className="project-badge">{repo.language}</span>
-                            )}
+                  <div className="project-glow-border"></div>
+                  <div className="project-item-inner">
+                    <div className="project-item-header">
+                      <div className="project-info">
+                        <div className="project-name">
+                          <a href={repo.html_url} target="_blank" rel="noopener noreferrer">
+                            {repo.name}
+                          </a>
+                          {repo.archived && <span className="project-badge archived">归档</span>}
+                          {repo.language && <span className="project-badge">{repo.language}</span>}
+                        </div>
+                        <div className="project-description">
+                          {repo.description || '该项目暂无描述信息'}
+                        </div>
+                        <div className="project-meta">
+                          <div className="meta-item">
+                            <i className="fas fa-star"></i>
+                            <span>{repo.stargazers_count.toLocaleString()}</span>
                           </div>
-                          <div className="project-description">
-                            {repo.description || '该项目暂无描述信息'}
+                          <div className="meta-item">
+                            <i className="fas fa-code-branch"></i>
+                            <span>{repo.forks_count.toLocaleString()}</span>
                           </div>
-                          <div className="project-meta">
-                            <div className="meta-item">
-                              <i className="fas fa-star"></i>
-                              <span>{repo.stargazers_count.toLocaleString()}</span>
-                            </div>
-                            <div className="meta-item">
-                              <i className="fas fa-code-branch"></i>
-                              <span>{repo.forks_count.toLocaleString()}</span>
-                            </div>
-                            <div className="meta-item">
-                              <i className="fas fa-clock"></i>
-                              <span>更新于 {relativeTimeText(repo.updated_at)}</span>
-                            </div>
-                            {repo.open_issues_count > 0 && (
-                              <div className="meta-item">
-                                <i className="fas fa-exclamation-circle"></i>
-                                <span>{repo.open_issues_count}个问题</span>
-                              </div>
-                            )}
+                          <div className="meta-item">
+                            <i className="fas fa-clock"></i>
+                            <span>更新于 {relativeTimeText(repo.updated_at)}</span>
                           </div>
+                          {repo.open_issues_count > 0 && (
+                            <div className="meta-item">
+                              <i className="fas fa-exclamation-circle"></i>
+                              <span>{repo.open_issues_count}个问题</span>
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <div className="project-links">
-                        <button
-                          className="project-link preview"
-                          onClick={() => handlePreviewProject(repo)}
-                          title="项目预览"
-                        >
-                          <i className="fas fa-eye"></i>预览
-                        </button>
+                    </div>
+                    <div className="project-links">
+                      <button
+                        className="project-link preview"
+                        onClick={() => handlePreviewProject(repo)}
+                        title="项目预览"
+                      >
+                        <i className="fas fa-eye"></i>预览
+                      </button>
+                      <a
+                        href={repo.html_url}
+                        className="project-link"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <i className="fas fa-external-link-alt"></i>访问
+                      </a>
+                      <button className="project-link readme" onClick={() => onOpenReadme(repo)}>
+                        <i className="fas fa-file-alt"></i>README
+                      </button>
+                      {repo.has_issues && (
                         <a
-                          href={repo.html_url}
-                          className="project-link"
+                          href={`${repo.html_url}/issues`}
+                          className="project-link issue"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <i className="fas fa-external-link-alt"></i>访问
+                          <i className="fas fa-bug"></i>问题
                         </a>
-                        <button
-                          className="project-link readme"
-                          onClick={() => handleOpenModal(repo)}
-                        >
-                          <i className="fas fa-file-alt"></i>README
-                        </button>
-                        {repo.has_issues && (
-                          <a
-                            href={`${repo.html_url}/issues`}
-                            className="project-link issue"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <i className="fas fa-bug"></i>问题
-                          </a>
-                        )}
-                      </div>
+                      )}
                     </div>
                   </div>
-                ))}
-              </div>
-
-              {totalPages > 1 && (
-                <div className="pagination">
-                  <button
-                    className="page-btn"
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage((prev) => prev - 1)}
-                  >
-                    <i className="fas fa-chevron-left"></i> 上一页
-                  </button>
-                  <span className="page-info">
-                    第 {currentPage} 页 / 共 {totalPages} 页
-                  </span>
-                  <button
-                    className="page-btn"
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage((prev) => prev + 1)}
-                  >
-                    下一页 <i className="fas fa-chevron-right"></i>
-                  </button>
                 </div>
-              )}
-            </>
-          )}
-        </div>
-      </section>
+              ))}
+            </div>
 
-      {selectedRepo && (
-        <ReadmeModal
-          key={modalOpenTime}
-          repoName={selectedRepo.name}
-          repoFullName={selectedRepo.full_name}
-          repoUrl={selectedRepo.html_url}
-          onFetch={fetchReadme}
-          onClose={() => setSelectedRepo(null)}
-        />
-      )}
-    </>
+            {totalPages > 1 && (
+              <div className="pagination">
+                <button
+                  className="page-btn"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                >
+                  <i className="fas fa-chevron-left"></i> 上一页
+                </button>
+                <span className="page-info">
+                  第 {currentPage} 页 / 共 {totalPages} 页
+                </span>
+                <button
+                  className="page-btn"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                >
+                  下一页 <i className="fas fa-chevron-right"></i>
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </section>
   );
 }

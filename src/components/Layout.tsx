@@ -27,13 +27,7 @@ interface LayoutProps {
   onRetryRepos: () => void;
 }
 
-export function Layout({
-  config,
-  repos,
-  reposLoading,
-  reposError,
-  onRetryRepos,
-}: LayoutProps) {
+export function Layout({ config, repos, reposLoading, reposError, onRetryRepos }: LayoutProps) {
   const layout = config.layout ?? {};
   const navbar = layout.navbar ?? { sticky: false };
   const hero = layout.hero ?? { show: false };
@@ -68,12 +62,7 @@ export function Layout({
       {hero.show && <Hero />}
       {hitokoto.show && <Hitokoto />}
       {stats.show && (
-        <Stats
-          repos={repos}
-          loading={reposLoading}
-          error={reposError}
-          onRetry={onRetryRepos}
-        />
+        <Stats repos={repos} loading={reposLoading} error={reposError} onRetry={onRetryRepos} />
       )}
       {projects.show && (
         <Projects

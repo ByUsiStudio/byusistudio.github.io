@@ -364,9 +364,9 @@ export function ReadmeModal({
       return;
     }
 
-    const headings = Array.from(
-      markdownRef.current.querySelectorAll<HTMLElement>('h2, h3'),
-    ).filter((el) => el.textContent?.trim());
+    const headings = Array.from(markdownRef.current.querySelectorAll<HTMLElement>('h2, h3')).filter(
+      (el) => el.textContent?.trim(),
+    );
 
     if (headings.length === 0) {
       setToc([]);

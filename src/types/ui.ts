@@ -15,6 +15,8 @@ export interface UiHeadConfig {
   }>;
   preconnect: string[];
   preload: Array<{ href: string; as: string; type?: string }>;
+  /** 配置版本号（用于热更新提示，可选） */
+  configVersion?: number;
 }
 
 export interface Theme {
@@ -106,6 +108,14 @@ export interface HitokotoConfig {
   show: boolean;
 }
 
+export interface ActivityConfig {
+  show: boolean;
+  title?: string;
+  /** 统计“最近动态”的时间窗口（天） */
+  days?: number;
+  maxItems?: number;
+}
+
 export interface FooterLink {
   label: string;
   href: string;
@@ -131,6 +141,7 @@ export interface LayoutConfig {
   projects: ProjectsConfig;
   team: TeamConfig;
   hitokoto: HitokotoConfig;
+  activity?: ActivityConfig;
   footer: FooterConfig;
 }
 

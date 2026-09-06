@@ -14,5 +14,4 @@ export interface Repo {
   open_issues_count: number;
 }
 
-export const mockRepos: Repo[] = [
-];
+export const mockRepos: Repo[] = [];

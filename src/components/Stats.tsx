@@ -82,7 +82,8 @@ function LanguageBreakdown({ repos }: { repos: Repo[] }) {
 
   const top = items.slice(0, 8);
   const restCount = items.slice(8).reduce((sum, item) => sum + item.count, 0);
-  const display: LanguageItem[] = restCount > 0 ? [...top, { name: '其他', count: restCount }] : top;
+  const display: LanguageItem[] =
+    restCount > 0 ? [...top, { name: '其他', count: restCount }] : top;
   const total = items.reduce((sum, item) => sum + item.count, 0);
 
   return (
